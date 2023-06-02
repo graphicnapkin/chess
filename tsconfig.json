@@ -15,5 +15,5 @@
         "noEmit": true,
         "jsx": "react"
     },
-    "include": ["src", "dist/coi-serviceworker.js", "dist/stockfish"]
+    "include": ["src"]
 }
