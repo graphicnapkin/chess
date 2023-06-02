@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useRef, ReactFragment } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Chessboard from 'chessboardjsx'
 import { Chess, Square } from 'chess.js'
 import Pieces from './chesspieces'
 
 export const Game = () => {
-    const [capturedWhite, setCapturedWhite] = useState<string[]>([])
-    const [capturedBlack, setCapturedBlack] = useState<string[]>([])
+    const [capturedPieces, setCapturedPieces] = useState<string[]>([])
     const [highLightStyles, setHighLightStyles] = useState<{
         [key: string]: string
     }>({})
@@ -16,15 +15,27 @@ export const Game = () => {
         fen,
         setFen,
         gameOver,
+        setGameOver,
         gameResult,
+        setGameResult,
         checkGameStatus,
         undoMove,
-        resetGame,
         setPlayerColor,
         playerColor,
-    } = useChessGame()
+    } = useChessGame(setCapturedPieces)
 
     const stockfish = useStockfishWorker(game, setFen, difficulty, playerColor)
+
+    const resetGame = () => {
+        game.reset()
+        setFen(game.fen())
+        setGameOver(false)
+        setGameResult('')
+        if (game.turn() != playerColor) {
+            stockfish.current?.postMessage('position fen ' + game.fen())
+            stockfish.current?.postMessage('go depth 9')
+        }
+    }
 
     const movePiece = (move: { from: string; to: string; piece: string }) => {
         // If it's not the player's turn, ignore the move
@@ -41,16 +52,7 @@ export const Game = () => {
 
         checkGameStatus()
         setFen(game.fen()) // Update the chessboard position
-        if (newMove.flags.includes('c') || newMove.flags.includes('e')) {
-            const piece =
-                newMove.color === 'w' ? `b${move.piece}` : `w${move.piece}`
-
-            if (newMove.color === 'w') {
-                setCapturedBlack((capturedBlack) => [...capturedBlack, piece])
-            } else {
-                setCapturedWhite((capturedWhite) => [...capturedWhite, piece])
-            }
-        }
+        setCapturedPieces(getCapturedPieces(game))
     }
 
     const currentTurn = game.turn() === 'w' ? 'White' : 'Black'
@@ -77,8 +79,6 @@ export const Game = () => {
         setHighLightStyles(highLightStyles)
     }
 
-    // console.log('captuered black:', capturedBlack)
-    // console.log('captured white:', capturedWhite)
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
             <InfoDisplay
@@ -86,6 +86,11 @@ export const Game = () => {
                 gameResult={gameResult}
                 currentTurn={currentTurn}
             />
+            <CapturedPeices
+                pieces={capturedPieces}
+                color={playerColor == 'w' ? 'w' : 'b'}
+            />
+            <br />
             <Chessboard
                 boardStyle={{
                     borderRadius: '5px',
@@ -107,38 +112,53 @@ export const Game = () => {
                 onMouseOutSquare={() => setHighLightStyles({})}
                 squareStyles={highLightStyles}
             />
+            <br />
+            <CapturedPeices
+                pieces={capturedPieces}
+                color={playerColor == 'w' ? 'b' : 'w'}
+            />
             <Controls
                 undoMove={undoMove}
                 resetGame={resetGame}
                 difficulty={difficulty}
                 setDifficulty={setDifficulty}
                 setPlayerColor={setPlayerColor}
+                playerColor={playerColor}
             />
-            <CapturedBlackPieces pieces={capturedBlack} />
-            <CapturedWhitePieces pieces={capturedWhite} />
         </div>
     )
 }
 
-const CapturedWhitePieces = ({ pieces }: { pieces: string[] }) => (
-    <div>
-        {pieces.map((piece, index) => (
-            <div>
-                {piece}
-                {Pieces[(piece[0] + piece[2]) as 'wK']}
-            </div>
-        ))}
-    </div>
-)
+function getCapturedPieces(chess: Chess) {
+    const history = chess.history({ verbose: true })
+    let capturedPieces = []
 
-const CapturedBlackPieces = ({ pieces }: { pieces: string[] }) => (
-    <div>
-        {pieces.map((piece, index) => (
-            <div>
-                {piece}
-                {Pieces[(piece[0] + piece[2]) as 'wK']}
-            </div>
-        ))}
+    for (let move of history) {
+        if (move.captured) {
+            // The color of the captured piece is the opposite of the color of the current move.
+            const color = move.color === 'w' ? 'b' : 'w'
+            capturedPieces.push(color + move.captured)
+        }
+    }
+
+    return capturedPieces
+}
+
+const CapturedPeices = ({
+    pieces,
+    color,
+}: {
+    pieces: string[]
+    color: 'w' | 'b'
+}) => (
+    <div className="flex flex-row" style={{ minHeight: '45px' }}>
+        {pieces
+            .filter((piece) => piece[0] == color)
+            .map((piece, index) => (
+                <div key={index}>
+                    {Pieces[(piece[0] + piece[1].toUpperCase()) as 'wP']}
+                </div>
+            ))}
     </div>
 )
 
@@ -147,65 +167,155 @@ const Controls = ({
     resetGame,
     difficulty,
     setDifficulty,
+    playerColor,
     setPlayerColor,
 }: {
     undoMove: () => void
     resetGame: () => void
     difficulty: number
     setDifficulty: React.Dispatch<React.SetStateAction<number>>
+    playerColor: string
     setPlayerColor: React.Dispatch<React.SetStateAction<string>>
 }) => {
+    const [undoColor, setUndoColor] = useState('slategray')
+    const [showModal, setShowModal] = useState(false)
+    const [tempColor, setTempColor] = useState(playerColor)
+    const [tempDifficulty, setTempDifficulty] = useState(difficulty)
+
     return (
         <div className="flex flex-col items-center justify-center mt-10">
+            {showModal && (
+                <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-4 max-w-sm w-full">
+                        <div className="flex flex-col items-start">
+                            <div className="flex items-center w-full">
+                                <div className="text-gray-900 font-medium text-lg">
+                                    Game Settings
+                                </div>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2}
+                                    stroke="currentColor"
+                                    className="w-4 h-4 ml-auto cursor-pointer"
+                                    onClick={() => setShowModal(false)}
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
+                                </svg>
+                            </div>
+                            <hr className="my-3" />
+                            <div className="py-4 flex items-center justify-between">
+                                <label
+                                    htmlFor="difficulty"
+                                    className="mr-2 text-sm font-medium text-gray-700"
+                                >
+                                    Difficulty
+                                </label>
+                                <select
+                                    id="difficulty"
+                                    name="difficulty"
+                                    className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                    value={tempDifficulty}
+                                    onChange={(e) =>
+                                        setTempDifficulty(
+                                            parseInt(e.target.value)
+                                        )
+                                    }
+                                >
+                                    {Array.from(
+                                        { length: 11 },
+                                        (_, i) => i
+                                    ).map((value) => (
+                                        <option key={value} value={value}>
+                                            {value}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex items-center mt-4">
+                                <span className="mr-2">Player Color: </span>
+                                <input
+                                    id="playerColorWhite"
+                                    type="radio"
+                                    name="playerColor"
+                                    value="w"
+                                    checked={tempColor == 'w'}
+                                    className="mr-1"
+                                    onChange={(e) =>
+                                        setTempColor(e.target.value)
+                                    }
+                                />
+                                <label
+                                    htmlFor="playerColorWhite"
+                                    className="mr-4"
+                                >
+                                    White
+                                </label>
+                                <input
+                                    id="playerColorBlack"
+                                    type="radio"
+                                    name="playerColor"
+                                    value="b"
+                                    checked={tempColor == 'b'}
+                                    className="mr-1"
+                                    onChange={(e) =>
+                                        setTempColor(e.target.value)
+                                    }
+                                />
+                                <label htmlFor="playerColorBlack">Black</label>
+                            </div>
+                            <hr className="my-3" />
+                            <div className="flex w-full justify-center space-x-3">
+                                <button
+                                    className="btn px-4 bg-red-500 text-white rounded hover:bg-red-700"
+                                    onClick={() => {
+                                        setPlayerColor(tempColor)
+                                        setDifficulty(tempDifficulty)
+                                        resetGame()
+                                        setShowModal(false)
+                                    }}
+                                >
+                                    New Game
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="flex space-x-4 mb-4">
-                <button
-                    className="btn px-8 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-                    onClick={undoMove}
-                >
-                    Undo Move
-                </button>
-                <button
-                    className="btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-                    onClick={resetGame}
-                >
-                    New Game
-                </button>
-            </div>
-            <label htmlFor="difficulty" className="mb-2">
-                Difficulty: {difficulty}
-            </label>
-            <input
-                id="difficulty"
-                type="range"
-                defaultValue={difficulty}
-                min="0"
-                max="10"
-                className="w-64"
-                onChange={(e) => setDifficulty(parseInt(e.target.value))}
-            />
-            <div className="flex items-center mt-4">
-                <span className="mr-2">Player Color: </span>
-                <input
-                    id="playerColorWhite"
-                    type="radio"
-                    name="playerColor"
-                    value="w"
-                    defaultChecked
-                    className="mr-1"
-                    onChange={(e) => setPlayerColor(e.target.value)}
-                />
-                <label htmlFor="playerColorWhite" className="mr-4">
-                    White
-                </label>
-                <input
-                    id="playerColorBlack"
-                    type="radio"
-                    name="playerColor"
-                    value="b"
-                    className="mr-1"
-                    onChange={(e) => setPlayerColor(e.target.value)}
-                />
-                <label htmlFor="playerColorBlack">Black</label>
+                <div className="my-auto">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6 cursor-pointer"
+                        onClick={undoMove}
+                        color={undoColor}
+                        onMouseOver={() => setUndoColor('black')}
+                        onMouseOut={() => setUndoColor('slategray')}
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+                        />
+                    </svg>
+                </div>
+                <div className="container mx-auto">
+                    <button
+                        className="btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                        onClick={() => setShowModal(true)}
+                    >
+                        New Game
+                    </button>
+                </div>
             </div>
         </div>
     )
@@ -247,7 +357,9 @@ const tryMove = (
     }
 }
 
-const useChessGame = () => {
+const useChessGame = (
+    setCapturedPieces: React.Dispatch<React.SetStateAction<string[]>>
+) => {
     const [game] = useState(new Chess())
     const [fen, setFen] = useState('start')
     const [gameOver, setGameOver] = useState(false)
@@ -257,6 +369,12 @@ const useChessGame = () => {
     useEffect(() => {
         setFen(game.fen())
     }, [game])
+
+    useEffect(() => {
+        setTimeout(() => {
+            setCapturedPieces(getCapturedPieces(game))
+        }, 499)
+    }, [game.moveNumber()])
 
     const checkGameStatus = () => {
         if (game.isCheckmate()) {
@@ -276,13 +394,6 @@ const useChessGame = () => {
         setFen(game.fen())
     }
 
-    const resetGame = () => {
-        game.reset()
-        setFen(game.fen())
-        setGameOver(false)
-        setGameResult('')
-    }
-
     const currentTurn = game.turn() === 'w' ? 'White' : 'Black'
 
     return {
@@ -295,7 +406,6 @@ const useChessGame = () => {
         setGameResult,
         checkGameStatus,
         undoMove,
-        resetGame,
         currentTurn,
         setPlayerColor,
         playerColor,
@@ -311,21 +421,26 @@ const useStockfishWorker = (
     const stockfish = useRef<Worker | null>(null)
 
     useEffect(() => {
+        if (stockfish.current) {
+            stockfish.current.terminate()
+            console.log('Terminated stockfish')
+        }
+
         if (window.Worker) {
             stockfish.current = new Worker('/stockfish/stockfish.js')
             stockfish.current.onmessage = stockfishMessage
-            if (playerColor == 'b') {
-                stockfish.current.postMessage('position fen ' + game.fen())
-                stockfish.current.postMessage('go depth 9')
-            }
+            stockfish.current?.postMessage(
+                'setoption name Skill Level value ' + difficulty
+            )
         }
-    }, [playerColor])
+        if (game.turn() != playerColor) {
+            stockfish.current?.postMessage('position fen ' + game.fen())
+            stockfish.current?.postMessage('go depth 9')
+        }
+    }, [playerColor, difficulty])
 
     const stockfishMessage = (event: MessageEvent<any>) => {
-        stockfish.current?.postMessage(
-            'setoption name Skill Level value ' + difficulty
-        )
-        // console.log('Stockfish said: ' + event.data)
+        console.log('Stockfish said: ' + event.data)
 
         if (game.turn() != playerColor && event.data.includes('bestmove')) {
             const bestMove = event.data.split(' ')[1]
@@ -341,16 +456,4 @@ const useStockfishWorker = (
     }
 
     return stockfish
-}
-
-function get_captured_pieces(game: Chess, color: string) {
-    const captured = { p: 0, n: 0, b: 0, r: 0, q: 0 }
-
-    for (const move of game.history({ verbose: true })) {
-        if (move.hasOwnProperty('captured') && move.color !== color[0]) {
-            captured[move.captured! as 'p']++
-        }
-    }
-
-    return captured
 }
