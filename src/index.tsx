@@ -1,11 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Game } from './Game'
+import App from './App'
 import './index.css'
 
-function App() {
-    return <Game />
-}
+console.log('loading ap')
 
 ReactDOM.render(
     <React.StrictMode>

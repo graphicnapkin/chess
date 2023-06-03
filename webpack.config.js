@@ -5,7 +5,10 @@ module.exports = (env, argv) => {
 
     return {
         mode: isProd ? 'production' : 'development',
-        entry: './src/index.tsx',
+        entry: {
+            main: './src/index.tsx',
+            serviceWorker: './src/coi-serviceworker.js',
+        },
         module: {
             rules: [
                 {
@@ -30,7 +33,7 @@ module.exports = (env, argv) => {
             extensions: ['.tsx', '.ts', '.js'],
         },
         output: {
-            filename: 'bundle.js',
+            filename: '[name].bundle.js',
             path: path.resolve(__dirname, 'dist'),
         },
         devServer: {
