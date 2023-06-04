@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Chessboard from 'chessboardjsx'
 import CapturedPieces from './components/CapturedPieces'
 import Controls from './components/Controls'
@@ -10,7 +10,6 @@ import { useStockfishWorker } from './hooks/useStockfishWorker'
 import { type Square } from 'chess.js'
 
 const App = () => {
-    const [capturedPieces, setCapturedPieces] = useState<string[]>([])
     const [highLightStyles, setHighLightStyles] = useState<{
         [key: string]: string
     }>({})
@@ -18,56 +17,23 @@ const App = () => {
 
     const {
         game,
+        resetGame,
         fen,
-        setFen,
         gameOver,
-        setGameOver,
         gameResult,
-        setGameResult,
-        checkGameStatus,
         makeMove,
         undoMove,
         playerColor,
         setPlayerColor,
-        getCapturedPieces,
-    } = useChessGame(setCapturedPieces)
+        capturedPieces,
+    } = useChessGame()
 
     const stockfish = useStockfishWorker(
         game,
-        setFen,
         difficulty,
         playerColor,
         makeMove
     )
-
-    const resetGame = () => {
-        game.reset()
-        setFen(game.fen())
-        setGameOver(false)
-        setGameResult('')
-        if (game.turn() != playerColor) {
-            stockfish.current?.postMessage('position fen ' + game.fen())
-            stockfish.current?.postMessage('go depth 9')
-        }
-    }
-
-    const movePiece = (move: { from: string; to: string; piece: string }) => {
-        // If it's not the player's turn, ignore the move
-        if (
-            (game.turn() === 'w' && move.piece.search(/^b/) !== -1) ||
-            (game.turn() === 'b' && move.piece.search(/^w/) !== -1)
-        ) {
-            return
-        }
-
-        const newMove = makeMove(move, game, stockfish)
-        console.log('newMove: ', newMove)
-        if (!newMove) return
-
-        checkGameStatus()
-        setFen(game.fen()) // Update the chessboard position
-        setCapturedPieces(getCapturedPieces(game))
-    }
 
     const handleMouseOverSquare = (square: Square) => {
         const highlightSquareStyles = {
@@ -93,6 +59,21 @@ const App = () => {
 
     const currentTurn = game.turn() === 'w' ? 'White' : 'Black'
 
+    const handleMove = (move: {
+        sourceSquare: string
+        targetSquare: string
+        piece: string
+    }) => {
+        makeMove(
+            {
+                from: move.sourceSquare,
+                to: move.targetSquare,
+                piece: move.piece,
+            },
+            game,
+            stockfish
+        )
+    }
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
             <InfoDisplay
@@ -115,13 +96,7 @@ const App = () => {
                 position={fen}
                 draggable={true}
                 orientation={playerColor == 'w' ? 'white' : 'black'}
-                onDrop={(move) => {
-                    movePiece({
-                        from: move.sourceSquare,
-                        to: move.targetSquare,
-                        piece: move.piece,
-                    })
-                }}
+                onDrop={handleMove}
                 calcWidth={({ screenWidth }) => (screenWidth < 500 ? 350 : 480)}
                 onMouseOverSquare={handleMouseOverSquare}
                 onMouseOutSquare={() => setHighLightStyles({})}
@@ -134,7 +109,7 @@ const App = () => {
             />
             <Controls
                 undoMove={undoMove}
-                resetGame={resetGame}
+                resetGame={() => resetGame(stockfish)}
                 difficulty={difficulty}
                 setDifficulty={setDifficulty}
                 setPlayerColor={setPlayerColor}

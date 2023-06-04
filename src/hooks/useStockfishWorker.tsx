@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react'
-import { Chess, Move } from 'chess.js'
+import { Chess } from 'chess.js'
 
 export const useStockfishWorker = (
     game: Chess,
-    setFen: React.Dispatch<React.SetStateAction<string>>,
     difficulty: number,
     playerColor: string,
     makeMove: (
@@ -14,7 +13,7 @@ export const useStockfishWorker = (
         },
         game: Chess,
         stockfish?: React.MutableRefObject<Worker | null>
-    ) => Move | undefined
+    ) => void
 ) => {
     const stockfish = useRef<Worker | null>(null)
 
@@ -49,7 +48,6 @@ export const useStockfishWorker = (
             }
 
             makeMove(nextMove, game, stockfish)
-            setFen(game.fen())
         }
     }
 
