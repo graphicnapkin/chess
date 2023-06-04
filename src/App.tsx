@@ -95,7 +95,6 @@ const App = () => {
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <h1>WHAT THE HELL</h1>
             <InfoDisplay
                 gameOver={gameOver}
                 gameResult={gameResult}
