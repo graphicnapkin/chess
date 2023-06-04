@@ -122,6 +122,7 @@ const App = () => {
                         piece: move.piece,
                     })
                 }}
+                calcWidth={({ screenWidth }) => (screenWidth < 500 ? 350 : 480)}
                 onMouseOverSquare={handleMouseOverSquare}
                 onMouseOutSquare={() => setHighLightStyles({})}
                 squareStyles={highLightStyles}

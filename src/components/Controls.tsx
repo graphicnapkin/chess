@@ -16,7 +16,7 @@ const Controls = ({
     setPlayerColor: React.Dispatch<React.SetStateAction<string>>
 }) => {
     const [undoColor, setUndoColor] = useState('slategray')
-    const [showModal, setShowModal] = useState(false)
+    const [showModal, setShowModal] = useState(true)
     const [tempColor, setTempColor] = useState(playerColor)
     const [tempDifficulty, setTempDifficulty] = useState(difficulty)
 
@@ -35,7 +35,11 @@ const Controls = ({
                 />
             )}
 
-            <div className="flex space-x-4 mb-4">
+            <div
+                className={`flex space-x-4 mb-4 opacity-${
+                    showModal ? '0' : '100'
+                }`}
+            >
                 <UndoMove
                     undoMove={undoMove}
                     undoColor={undoColor}
@@ -68,10 +72,10 @@ const Modal = ({
 }) => {
     return (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-4 max-w-sm w-full">
+            <div className="bg-white rounded-lg p-4 max-w-sm w-300">
                 <div className="flex flex-col items-start">
                     <div className="flex items-center w-full">
-                        <div className="text-gray-900 font-medium text-lg">
+                        <div className="text-gray-900 font-medium text-lg mr-4">
                             Game Settings
                         </div>
                         <svg
@@ -91,17 +95,14 @@ const Modal = ({
                         </svg>
                     </div>
                     <hr className="my-3" />
-                    <div className="py-4 flex items-center justify-between">
-                        <label
-                            htmlFor="difficulty"
-                            className="mr-2 text-sm font-medium text-gray-700"
-                        >
-                            Difficulty
+                    <div className="py-1 flex items-center justify-between">
+                        <label htmlFor="difficulty" className="mr-8">
+                            <b>Difficulty: </b>
                         </label>
                         <select
                             id="difficulty"
                             name="difficulty"
-                            className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                            className="block text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                             value={tempDifficulty}
                             onChange={(e) =>
                                 setTempDifficulty(parseInt(e.target.value))
@@ -116,8 +117,10 @@ const Modal = ({
                             )}
                         </select>
                     </div>
-                    <div className="flex items-center mt-4">
-                        <span className="mr-2">Player Color: </span>
+                    <div className="mr-2">
+                        <b>Player Color: </b>
+                    </div>
+                    <div className="flex items-center">
                         <input
                             id="playerColorWhite"
                             type="radio"
@@ -144,7 +147,7 @@ const Modal = ({
                     <hr className="my-3" />
                     <div className="flex w-full justify-center space-x-3">
                         <button
-                            className="btn px-4 bg-red-500 text-white rounded hover:bg-red-700"
+                            className="btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
                             onClick={() => {
                                 setPlayerColor(tempColor)
                                 setDifficulty(tempDifficulty)
@@ -152,7 +155,7 @@ const Modal = ({
                                 setShowModal(false)
                             }}
                         >
-                            New Game
+                            Start Game
                         </button>
                     </div>
                 </div>
