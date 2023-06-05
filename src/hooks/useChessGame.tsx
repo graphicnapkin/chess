@@ -17,6 +17,7 @@ export const useChessGame = () => {
     }, [game.moveNumber()])
 
     const undoMove = () => {
+        // undo twice to go back to the current players move
         game.undo()
         game.undo()
         setFen(game.fen())
@@ -80,20 +81,16 @@ export const useChessGame = () => {
         }
     }
 
-    const currentTurn = game.turn() === 'w' ? 'White' : 'Black'
-
     return {
         game,
+        resetGame,
         fen,
-        setFen,
         gameOver,
         gameResult,
-        undoMove,
-        currentTurn,
-        setPlayerColor,
-        playerColor,
-        capturedPieces,
         makeMove,
-        resetGame,
+        undoMove,
+        playerColor,
+        setPlayerColor,
+        capturedPieces,
     }
 }

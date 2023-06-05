@@ -12,7 +12,7 @@ export const useStockfishWorker = (
             promotion?: string
         },
         game: Chess,
-        stockfish?: React.MutableRefObject<Worker | null>
+        stockfish: React.MutableRefObject<Worker | null>
     ) => void
 ) => {
     const stockfish = useRef<Worker | null>(null)
