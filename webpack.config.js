@@ -1,9 +1,10 @@
 const path = require('path')
-
+const Dotenv = require('dotenv-webpack')
 module.exports = (env, argv) => {
     const isProd = argv.mode === 'production'
 
     return {
+        plugins: [new Dotenv()],
         mode: isProd ? 'production' : 'development',
         entry: {
             main: './src/index.tsx',
@@ -31,6 +32,11 @@ module.exports = (env, argv) => {
         },
         resolve: {
             extensions: ['.tsx', '.ts', '.js'],
+            fallback: {
+                crypto: false,
+                os: false,
+                path: false,
+            },
         },
         output: {
             filename: '[name].bundle.js',

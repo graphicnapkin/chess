@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Chessboard from 'chessboardjsx'
 import CapturedPieces from './components/CapturedPieces'
 import Controls from './components/Controls'
@@ -8,12 +8,14 @@ import { useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
 
 import { type Square } from 'chess.js'
+import { writeNewFen, newGameId } from './firebase'
 
 const App = () => {
     const [highLightStyles, setHighLightStyles] = useState<{
         [key: string]: string
     }>({})
     const [difficulty, setDifficulty] = useState(5)
+    const [gameType, setGameType] = useState<'ai' | 'multiplayer'>('ai')
 
     const {
         game,
@@ -73,9 +75,16 @@ const App = () => {
             game,
             stockfish
         )
+        const val = writeNewFen(game.fen())
+        val.then((res) => {
+            console.log('res')
+            console.log(res)
+        })
     }
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+            <h1>{gameType}</h1>
+            <h2>{gameType == 'multiplayer' && newGameId}</h2>
             <InfoDisplay
                 gameOver={gameOver}
                 gameResult={gameResult}
@@ -112,8 +121,10 @@ const App = () => {
                 resetGame={() => resetGame(stockfish)}
                 difficulty={difficulty}
                 setDifficulty={setDifficulty}
-                setPlayerColor={setPlayerColor}
                 playerColor={playerColor}
+                setPlayerColor={setPlayerColor}
+                gameType={gameType}
+                setGameType={setGameType}
             />
         </main>
     )
