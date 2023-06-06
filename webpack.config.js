@@ -2,9 +2,11 @@ const path = require('path')
 const Dotenv = require('dotenv-webpack')
 module.exports = (env, argv) => {
     const isProd = argv.mode === 'production'
+    const plugins = []
+    !isProd && plugins.push(new Dotenv())
 
     return {
-        plugins: [new Dotenv()],
+        plugins,
         mode: isProd ? 'production' : 'development',
         entry: {
             main: './src/index.tsx',
