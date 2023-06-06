@@ -1,4 +1,7 @@
-//require('dotenv').config()
+import { initializeApp } from 'firebase/app'
+import { getDatabase, ref, child, push, update } from 'firebase/database'
+import 'firebase/database'
+
 declare var process: {
     env: {
         apiKey: string
@@ -8,9 +11,6 @@ declare var process: {
 }
 
 // Import the functions you need from the SDKs you need
-import { initializeApp } from 'firebase/app'
-import { getDatabase, ref, child, push, update } from 'firebase/database'
-import 'firebase/database'
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -27,21 +27,28 @@ const firebaseConfig = {
     measurementId: 'G-JZDGWB329D',
 }
 
+console.log('firebaseConfig', firebaseConfig)
 // Initialize Firebase
 initializeApp(firebaseConfig)
+const db = getDatabase()
+
+export const newGameId = push(child(ref(db), 'games')).key
+const updates: { [key: string]: {} } = {}
+updates['/' + newGameId] = { game: 'chess' }
+console.log('gameId', newGameId)
+update(ref(db), updates)
+let turn = 0
 
 export const writeNewFen = (fen: string) => {
-    const db = getDatabase()
-    console.log('db name:', db.app.name)
-
-    const query = ref(db, '/')
-    console.log(query)
-
-    //console.log(newPostKey)
+    // A post entry.
+    const postData = {
+        fen,
+    }
 
     // Write the new post's data simultaneously in the posts list and the user's post list.
-    // const updates: { [key: string]: { fen: string } } = {}
-    // updates['/' + newPostKey] = postData
+    const updates: { [key: string]: { [key: number]: { fen: string } } } = {}
+    updates['/' + newGameId + '/' + turn] = postData
+    turn++
 
-    // return update(ref(db), updates)
+    return update(ref(db), updates)
 }
