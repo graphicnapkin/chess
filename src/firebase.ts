@@ -4,9 +4,9 @@ import 'firebase/database'
 
 declare var process: {
     env: {
-        apiKey: string
-        messagingSenderId: string
-        appId: string
+        REACT_APP_apiKey: string
+        REACT_APP_messagingSenderId: string
+        REACT_APP_appId: string
     }
 }
 
@@ -17,13 +17,13 @@ declare var process: {
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: process.env.apiKey,
+    apiKey: process.env.REACT_APP_apiKey,
     authDomain: 'chess-e8f86.firebaseapp.com',
     databaseURL: 'https://chess-e8f86-default-rtdb.firebaseio.com',
     projectId: 'chess-e8f86',
     storageBucket: 'chess-e8f86.appspot.com',
-    messageSenderId: process.env.messagingSenderId,
-    appId: process.env.appId,
+    messageSenderId: process.env.REACT_APP_messagingSenderId,
+    appId: process.env.REACT_APP_appId,
     measurementId: 'G-JZDGWB329D',
 }
 
