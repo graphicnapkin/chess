@@ -29,22 +29,19 @@ const firebaseConfig = {
 
 // Initialize Firebase
 initializeApp(firebaseConfig)
-const db = getDatabase()
-
-export const newGameId = push(child(ref(db), 'games')).key
 
 export const writeNewFen = (fen: string) => {
-    // A post entry.
-    const postData = {
-        fen,
-    }
+    const db = getDatabase()
+    console.log('db name:', db.app.name)
 
-    // Get a key for a new Post.
-    const newPostKey = push(child(ref(db), 'posts')).key
+    const query = ref(db, '/')
+    console.log(query)
+
+    //console.log(newPostKey)
 
     // Write the new post's data simultaneously in the posts list and the user's post list.
-    const updates: { [key: string]: { fen: string } } = {}
-    updates['/' + newPostKey] = postData
+    // const updates: { [key: string]: { fen: string } } = {}
+    // updates['/' + newPostKey] = postData
 
-    return update(ref(db), updates)
+    // return update(ref(db), updates)
 }

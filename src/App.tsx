@@ -8,7 +8,7 @@ import { useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
 
 import { type Square } from 'chess.js'
-import { writeNewFen, newGameId } from './firebase'
+import { writeNewFen } from './firebase'
 
 const App = () => {
     const [highLightStyles, setHighLightStyles] = useState<{
@@ -76,15 +76,11 @@ const App = () => {
             stockfish
         )
         const val = writeNewFen(game.fen())
-        val.then((res) => {
-            console.log('res')
-            console.log(res)
-        })
     }
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
             <h1>{gameType}</h1>
-            <h2>{gameType == 'multiplayer' && newGameId}</h2>
+            <h2>{gameType == 'multiplayer'}</h2>
             <InfoDisplay
                 gameOver={gameOver}
                 gameResult={gameResult}
