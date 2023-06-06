@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Chessboard from 'chessboardjsx'
 import CapturedPieces from './components/CapturedPieces'
 import Controls from './components/Controls'
@@ -8,8 +9,7 @@ import { useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
 
 import { type Square } from 'chess.js'
-import { writeNewFen } from './firebase'
-import { validate } from 'webpack'
+import { getGameState } from './firebase'
 
 const App = () => {
     const [highLightStyles, setHighLightStyles] = useState<{
@@ -37,6 +37,13 @@ const App = () => {
         playerColor,
         makeMove
     )
+
+    const location = useLocation()
+    const searchParams = new URLSearchParams(location.search)
+    const gameId = searchParams.get('id')
+    if (gameId) {
+        getGameState(gameId)
+    }
 
     const handleMouseOverSquare = (square: Square) => {
         const highlightSquareStyles = {
@@ -79,8 +86,9 @@ const App = () => {
     }
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <h1>{gameType + 'right?'}</h1>
-            <h2>{gameType == 'multiplayer'}</h2>
+            <h1>{gameType}</h1>
+            <h1>{gameId}</h1>
+
             <InfoDisplay
                 gameOver={gameOver}
                 gameResult={gameResult}

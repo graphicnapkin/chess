@@ -1,5 +1,12 @@
 import { initializeApp } from 'firebase/app'
-import { getDatabase, ref, child, push, update } from 'firebase/database'
+import {
+    getDatabase,
+    ref,
+    child,
+    push,
+    update,
+    onValue,
+} from 'firebase/database'
 import 'firebase/database'
 
 declare var process: {
@@ -51,4 +58,14 @@ export const writeNewFen = (fen: string) => {
     turn++
 
     return update(ref(db), updates)
+}
+
+export const getGameState = (gameId: string) => {
+    // read data from firebase using gameId
+    console.log('gameId', gameId)
+    const gameRef = ref(db, gameId)
+    onValue(gameRef, (snapshot) => {
+        const data = snapshot.val()
+        console.log('data', data)
+    })
 }
