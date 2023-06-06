@@ -2,8 +2,7 @@ const path = require('path')
 const Dotenv = require('dotenv-webpack')
 module.exports = (env, argv) => {
     const isProd = argv.mode === 'production'
-    const plugins = []
-    !isProd && plugins.push(new Dotenv())
+    const plugins = [new Dotenv()]
 
     return {
         plugins,
