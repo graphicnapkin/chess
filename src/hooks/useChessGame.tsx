@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Chess } from 'chess.js'
+import { writeNewFen } from '../firebase'
 
 export const useChessGame = () => {
     const [game] = useState(new Chess())
@@ -51,6 +52,10 @@ export const useChessGame = () => {
     ) => {
         try {
             game.move({ ...move, promotion: 'q' })
+            const val = writeNewFen(game.fen())
+            val.then((res) => {
+                console.log(res)
+            })
             if (stockfish) {
                 stockfish.current?.postMessage('position fen ' + game.fen())
                 stockfish.current?.postMessage('go depth 8')

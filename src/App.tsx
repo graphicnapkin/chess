@@ -67,7 +67,6 @@ const App = () => {
         targetSquare: string
         piece: string
     }) => {
-        const numberOfMoves = game.moveNumber()
         makeMove(
             {
                 from: move.sourceSquare,
@@ -77,18 +76,10 @@ const App = () => {
             game,
             stockfish
         )
-
-        // if the move was invalid, return
-        if (numberOfMoves === game.moveNumber()) return
-
-        const val = writeNewFen(game.fen())
-        val.then((res) => {
-            console.log(res)
-        })
     }
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <h1>{gameType}</h1>
+            <h1>{gameType + 'right?'}</h1>
             <h2>{gameType == 'multiplayer'}</h2>
             <InfoDisplay
                 gameOver={gameOver}
