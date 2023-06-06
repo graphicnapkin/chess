@@ -67,6 +67,7 @@ const App = () => {
         targetSquare: string
         piece: string
     }) => {
+        const numberOfMoves = game.moveNumber()
         makeMove(
             {
                 from: move.sourceSquare,
@@ -76,6 +77,10 @@ const App = () => {
             game,
             stockfish
         )
+
+        // if the move was invalid, return
+        if (numberOfMoves === game.moveNumber()) return
+
         const val = writeNewFen(game.fen())
         val.then((res) => {
             console.log(res)
