@@ -37,7 +37,7 @@ const firebaseConfig = {
 console.log('firebaseConfig', firebaseConfig)
 // Initialize Firebase
 initializeApp(firebaseConfig)
-const db = getDatabase()
+export const db = getDatabase()
 
 export const newGameId = push(child(ref(db), 'games')).key
 const updates: { [key: string]: {} } = {}
@@ -58,14 +58,4 @@ export const writeNewFen = (fen: string) => {
     turn++
 
     return update(ref(db), updates)
-}
-
-export const getGameState = (gameId: string) => {
-    // read data from firebase using gameId
-    console.log('gameId', gameId)
-    const gameRef = ref(db, gameId)
-    onValue(gameRef, (snapshot) => {
-        const data = snapshot.val()
-        console.log('data', data)
-    })
 }

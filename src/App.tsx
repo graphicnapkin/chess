@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import Chessboard from 'chessboardjsx'
 import CapturedPieces from './components/CapturedPieces'
@@ -7,9 +7,9 @@ import InfoDisplay from './components/InfoDisplay'
 
 import { useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
-
 import { type Square } from 'chess.js'
-import { getGameState } from './firebase'
+import { db } from './firebase'
+import { onValue, ref } from 'firebase/database'
 
 const App = () => {
     const [highLightStyles, setHighLightStyles] = useState<{
@@ -41,9 +41,16 @@ const App = () => {
     const location = useLocation()
     const searchParams = new URLSearchParams(location.search)
     const gameId = searchParams.get('id')
-    if (gameId) {
-        getGameState(gameId)
-    }
+
+    useEffect(() => {
+        const query = ref(db, '/' + gameId)
+        return onValue(query, (snapshot) => {
+            const data = snapshot.val()
+            if (snapshot.exists()) {
+                console.log(data)
+            }
+        })
+    }, [gameId])
 
     const handleMouseOverSquare = (square: Square) => {
         const highlightSquareStyles = {
