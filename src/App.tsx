@@ -101,6 +101,13 @@ const App = () => {
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
             <h1>{gameType}</h1>
             <Link to={`https://www.graphicnapkin.com/?id=${newGameId}`}>
+                <span
+                    style={{
+                        color: 'blue',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                    }}
+                ></span>
                 Follow Along
             </Link>
 
