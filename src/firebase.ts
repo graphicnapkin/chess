@@ -44,18 +44,18 @@ const updates: { [key: string]: {} } = {}
 updates['/' + newGameId] = { game: 'chess' }
 console.log('gameId', newGameId)
 update(ref(db), updates)
-let turn = 0
 
-export const writeNewFen = (fen: string) => {
+export const writeNewFen = (fen: string, playerColor: string, turn: string) => {
     // A post entry.
     const postData = {
         fen,
+        playerColor,
+        turn,
     }
 
     // Write the new post's data simultaneously in the posts list and the user's post list.
     const updates: { [key: string]: { [key: number]: { fen: string } } } = {}
-    updates['/' + newGameId + '/' + turn] = postData
-    turn++
+    updates['/' + newGameId] = postData
 
     return update(ref(db), updates)
 }

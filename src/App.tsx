@@ -22,6 +22,7 @@ const App = () => {
         game,
         resetGame,
         fen,
+        setFen,
         gameOver,
         gameResult,
         makeMove,
@@ -45,9 +46,15 @@ const App = () => {
     useEffect(() => {
         const query = ref(db, '/' + gameId)
         return onValue(query, (snapshot) => {
-            const data = snapshot.val()
+            const data = snapshot.val() as {
+                fen: string
+                playerColor: string
+                turn: string
+            }
             if (snapshot.exists()) {
                 console.log(data)
+                setFen(data.fen)
+                setPlayerColor(data.playerColor)
             }
         })
     }, [gameId])

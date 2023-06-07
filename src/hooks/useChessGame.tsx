@@ -52,7 +52,7 @@ export const useChessGame = () => {
     ) => {
         try {
             game.move({ ...move, promotion: 'q' })
-            const val = writeNewFen(game.fen())
+            const val = writeNewFen(game.fen(), playerColor, game.turn())
             val.then((res) => {
                 console.log(res)
             })
@@ -90,6 +90,7 @@ export const useChessGame = () => {
         game,
         resetGame,
         fen,
+        setFen,
         gameOver,
         gameResult,
         makeMove,
