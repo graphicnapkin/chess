@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Chessboard from 'chessboardjsx'
 import CapturedPieces from './components/CapturedPieces'
 import Controls from './components/Controls'
@@ -8,7 +8,7 @@ import InfoDisplay from './components/InfoDisplay'
 import { ChessMove, useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
 import { type Square } from 'chess.js'
-import { db } from './firebase'
+import { db, newGameId } from './firebase'
 import { onValue, ref } from 'firebase/database'
 
 const App = () => {
@@ -100,7 +100,9 @@ const App = () => {
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
             <h1>{gameType}</h1>
-            <h1>{gameId}</h1>
+            <Link to={`https://www.graphicnapkin.com/?id=${newGameId}`}>
+                Follow Along
+            </Link>
 
             <InfoDisplay
                 gameOver={gameOver}
