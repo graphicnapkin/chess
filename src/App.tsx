@@ -97,6 +97,7 @@ const App = () => {
             stockfish
         )
     }
+
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
             <h1>{gameType}</h1>
@@ -107,8 +108,9 @@ const App = () => {
                         textDecoration: 'underline',
                         cursor: 'pointer',
                     }}
-                ></span>
-                Follow Along
+                >
+                    Follow Along
+                </span>
             </Link>
 
             <InfoDisplay
