@@ -82,7 +82,6 @@ export const useChessGame = () => {
         game,
         resetGame,
         fen,
-        setFen,
         gameOver,
         gameResult,
         makeMove,

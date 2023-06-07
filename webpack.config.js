@@ -2,7 +2,14 @@ const path = require('path')
 const Dotenv = require('dotenv-webpack')
 module.exports = (env, argv) => {
     const isProd = argv.mode === 'production'
-    const plugins = [new Dotenv()]
+
+    const plugins = [
+        // This makes it possible to use environment variables in the app
+        // specifically ones from Vercel. See https://stackoverflow.com/questions/70537132/how-to-inject-environment-variables-in-vercel-non-next-js-apps
+        new Dotenv({
+            systemvars: true,
+        }),
+    ]
 
     return {
         plugins,

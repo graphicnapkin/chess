@@ -48,14 +48,14 @@ update(ref(db), updates)
 
 export const writeNewFen = (move: ChessMove, playerColor: string) => {
     // A post entry.
-    const postData = {
+    const moveData = {
         move,
         playerColor,
     }
 
     // Write the new post's data simultaneously in the posts list and the user's post list.
     const updates: { [key: string]: { [key: number]: { fen: string } } } = {}
-    updates['/' + newGameId] = postData
+    updates['/' + newGameId] = moveData
 
     return update(ref(db), updates)
 }

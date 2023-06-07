@@ -22,7 +22,6 @@ const App = () => {
         game,
         resetGame,
         fen,
-        setFen,
         gameOver,
         gameResult,
         makeMove,
@@ -39,11 +38,15 @@ const App = () => {
         makeMove
     )
 
+    // Get the game id from the url query string if it exists
     const location = useLocation()
     const searchParams = new URLSearchParams(location.search)
     const gameId = searchParams.get('id')
 
     useEffect(() => {
+        if (!gameId) return
+        // Listen for changes to the game state in the database
+        // and make the move if it exists
         const query = ref(db, '/' + gameId)
         return onValue(query, (snapshot) => {
             const data = snapshot.val() as {
@@ -58,6 +61,8 @@ const App = () => {
         })
     }, [gameId])
 
+    // Highlight the squares that the current piece can move to
+    // if it is the current players turn and there are moves available
     const handleMouseOverSquare = (square: Square) => {
         const highlightSquareStyles = {
             // Customize the style for the highlighted squares
@@ -67,7 +72,9 @@ const App = () => {
             square: square,
             verbose: true,
         })
+
         if (moves.length === 0) return
+
         const squares = moves.map((move) => move.to)
         const highLightStyles = squares.reduce((a, c) => {
             return {

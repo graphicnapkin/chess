@@ -1,3 +1,8 @@
+/*
+ * COOP/COEP Service Worker
+ * This is needed because WASM requires SharedArrayBuffers, which are only available in COOP/COEP contexts.
+ * WASM is used for stockfish, the chess engine powering the AI player.
+ */
 /*! coi-serviceworker v0.1.6 - Guido Zuidhof, licensed under MIT */
 'undefined' == typeof window
     ? (self.addEventListener('install', () => self.skipWaiting()),
