@@ -41,21 +41,13 @@ export const useChessGame = () => {
     }
 
     const makeMove = (
-        move: {
-            from: string
-            to: string
-            piece?: string
-            promotion?: string
-        },
+        move: ChessMove,
         game: Chess,
         stockfish?: React.MutableRefObject<Worker | null>
     ) => {
         try {
             game.move({ ...move, promotion: 'q' })
-            const val = writeNewFen(game.fen(), playerColor, game.turn())
-            val.then((res) => {
-                console.log(res)
-            })
+            writeNewFen(move, playerColor)
             if (stockfish) {
                 stockfish.current?.postMessage('position fen ' + game.fen())
                 stockfish.current?.postMessage('go depth 8')
@@ -99,4 +91,11 @@ export const useChessGame = () => {
         setPlayerColor,
         capturedPieces,
     }
+}
+
+export type ChessMove = {
+    from: string
+    to: string
+    piece?: string
+    promotion?: string
 }

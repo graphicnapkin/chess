@@ -8,6 +8,7 @@ import {
     onValue,
 } from 'firebase/database'
 import 'firebase/database'
+import { ChessMove } from './hooks/useChessGame'
 
 declare var process: {
     env: {
@@ -45,12 +46,11 @@ updates['/' + newGameId] = { game: 'chess' }
 console.log('gameId', newGameId)
 update(ref(db), updates)
 
-export const writeNewFen = (fen: string, playerColor: string, turn: string) => {
+export const writeNewFen = (move: ChessMove, playerColor: string) => {
     // A post entry.
     const postData = {
-        fen,
+        move,
         playerColor,
-        turn,
     }
 
     // Write the new post's data simultaneously in the posts list and the user's post list.

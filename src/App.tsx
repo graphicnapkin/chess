@@ -5,7 +5,7 @@ import CapturedPieces from './components/CapturedPieces'
 import Controls from './components/Controls'
 import InfoDisplay from './components/InfoDisplay'
 
-import { useChessGame } from './hooks/useChessGame'
+import { ChessMove, useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
 import { type Square } from 'chess.js'
 import { db } from './firebase'
@@ -47,14 +47,13 @@ const App = () => {
         const query = ref(db, '/' + gameId)
         return onValue(query, (snapshot) => {
             const data = snapshot.val() as {
-                fen: string
+                move: ChessMove
                 playerColor: string
-                turn: string
             }
             if (snapshot.exists()) {
                 console.log(data)
-                setFen(data.fen)
                 setPlayerColor(data.playerColor)
+                makeMove(data.move, game)
             }
         })
     }, [gameId])
