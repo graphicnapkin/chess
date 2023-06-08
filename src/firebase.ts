@@ -1,18 +1,14 @@
 import { initializeApp } from 'firebase/app'
-import {
-    getDatabase,
-    ref,
-    child,
-    push,
-    update,
-    onValue,
-} from 'firebase/database'
+import { getDatabase, ref, update } from 'firebase/database'
 import 'firebase/database'
 import { ChessMove } from './hooks/useChessGame'
 
 declare var process: {
     env: {
         REACT_APP_apiKey: string
+        REACT_APP_authDomain: string
+        REACT_APP_projectId: string
+        REACT_APP_storageBucket: string
         REACT_APP_messagingSenderId: string
         REACT_APP_appId: string
     }
@@ -24,15 +20,14 @@ declare var process: {
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_apiKey,
-    authDomain: 'chess-e8f86.firebaseapp.com',
-    databaseURL: 'https://chess-e8f86-default-rtdb.firebaseio.com',
-    projectId: 'chess-e8f86',
-    storageBucket: 'chess-e8f86.appspot.com',
-    messageSenderId: process.env.REACT_APP_messagingSenderId,
+    authDomain: process.env.REACT_APP_authDomain,
+    projectId: process.env.REACT_APP_projectId,
+    storageBucket: process.env.REACT_APP_storageBucket,
+    messagingSenderId: process.env.REACT_APP_messagingSenderId,
     appId: process.env.REACT_APP_appId,
-    measurementId: 'G-JZDGWB329D',
 }
 
 console.log('firebaseConfig', firebaseConfig)
@@ -40,13 +35,11 @@ console.log('firebaseConfig', firebaseConfig)
 initializeApp(firebaseConfig)
 export const db = getDatabase()
 
-export const newGameId = push(child(ref(db), 'games')).key
-const updates: { [key: string]: {} } = {}
-updates['/' + newGameId] = { game: 'chess' }
-console.log('gameId', newGameId)
-update(ref(db), updates)
-
-export const writeNewFen = (move: ChessMove, playerColor: string) => {
+export const writeNewFen = (
+    move: ChessMove,
+    playerColor: string,
+    gameId?: string
+) => {
     // A post entry.
     const moveData = {
         move,
@@ -55,7 +48,7 @@ export const writeNewFen = (move: ChessMove, playerColor: string) => {
 
     // Write the new post's data simultaneously in the posts list and the user's post list.
     const updates: { [key: string]: { [key: number]: { fen: string } } } = {}
-    updates['/' + newGameId] = moveData
+    updates['/' + gameId] = moveData
 
     return update(ref(db), updates)
 }

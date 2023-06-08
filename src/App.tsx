@@ -8,15 +8,26 @@ import InfoDisplay from './components/InfoDisplay'
 import { ChessMove, useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
 import { type Square } from 'chess.js'
-import { db, newGameId } from './firebase'
-import { onValue, ref } from 'firebase/database'
+import { db } from './firebase'
+import { child, onValue, push, ref } from 'firebase/database'
+
+const newGameId = push(child(ref(db), 'games')).key
 
 const App = () => {
+    const location = useLocation()
+    const searchParams = new URLSearchParams(location.search)
+    // get playerColor from params if it exists
+    const multiplayerPlayerColor = searchParams.get('color')
+    // get gameId from params if it exists or create a new one
+    let gameId = searchParams.get('id') || newGameId || 'error'
+
     const [highLightStyles, setHighLightStyles] = useState<{
         [key: string]: string
     }>({})
     const [difficulty, setDifficulty] = useState(5)
-    const [gameType, setGameType] = useState<'ai' | 'multiplayer'>('ai')
+    const [gameType, setGameType] = useState<'ai' | 'multiplayer'>(
+        'multiplayer'
+    )
 
     const {
         game,
@@ -29,22 +40,21 @@ const App = () => {
         playerColor,
         setPlayerColor,
         capturedPieces,
-    } = useChessGame()
+    } = useChessGame(multiplayerPlayerColor || 'w')
 
     const stockfish = useStockfishWorker(
         game,
+        gameType,
         difficulty,
         playerColor,
-        makeMove
+        makeMove,
+        multiplayerPlayerColor
     )
 
     // Get the game id from the url query string if it exists
-    const location = useLocation()
-    const searchParams = new URLSearchParams(location.search)
-    const gameId = searchParams.get('id')
 
     useEffect(() => {
-        if (!gameId) return
+        if (gameType == 'ai') return
         // Listen for changes to the game state in the database
         // and make the move if it exists
         const query = ref(db, '/' + gameId)
@@ -55,11 +65,13 @@ const App = () => {
             }
             if (snapshot.exists()) {
                 console.log(data)
-                setPlayerColor(data.playerColor)
-                makeMove(data.move, game)
+
+                makeMove(data.move, game, gameType, stockfish, gameId)
             }
         })
-    }, [gameId])
+    }, [])
+
+    // store the environment in a variable
 
     // Highlight the squares that the current piece can move to
     // if it is the current players turn and there are moves available
@@ -101,24 +113,31 @@ const App = () => {
                 piece: move.piece,
             },
             game,
-            stockfish
+            gameType,
+            stockfish,
+            gameId || ''
         )
+    }
+
+    const isDev = process.env.NODE_ENV === 'development'
+    const linkStyle = {
+        color: 'blue',
+        textDecoration: 'underline',
+        cursor: 'pointer',
     }
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <h1>{gameType}</h1>
-            <Link to={`https://www.graphicnapkin.com/?id=${newGameId}`}>
-                <span
-                    style={{
-                        color: 'blue',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                    }}
+            <h1>Game Mode: {gameType}</h1>
+            {!multiplayerPlayerColor && gameType != 'ai' && (
+                <Link
+                    to={`${
+                        isDev ? 'localhost:9000' : 'https://graphicnapkin.com'
+                    }/?id=${gameId}&color=${playerColor == 'w' ? 'b' : 'w'}`}
                 >
-                    Follow Along
-                </span>
-            </Link>
+                    <span style={linkStyle}>Share Link with Friend</span>
+                </Link>
+            )}
 
             <InfoDisplay
                 gameOver={gameOver}
@@ -160,7 +179,15 @@ const App = () => {
                 setPlayerColor={setPlayerColor}
                 gameType={gameType}
                 setGameType={setGameType}
+                skipConfig={multiplayerPlayerColor ? true : false}
             />
+            <footer>
+                Checkout this project on
+                <Link to="https://github.com/graphicnapkin/chess">
+                    {' '}
+                    <span style={linkStyle}>Github</span>
+                </Link>
+            </footer>
         </main>
     )
 }

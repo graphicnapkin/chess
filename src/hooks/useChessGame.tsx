@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { Chess } from 'chess.js'
 import { writeNewFen } from '../firebase'
 
-export const useChessGame = () => {
+export const useChessGame = (p: string) => {
     const [game] = useState(new Chess())
     const [fen, setFen] = useState('start')
     const [gameOver, setGameOver] = useState(false)
     const [gameResult, setGameResult] = useState('')
-    const [playerColor, setPlayerColor] = useState('w')
+    const [playerColor, setPlayerColor] = useState(p)
     const [capturedPieces, setCapturedPieces] = useState<string[]>([])
 
     useEffect(() => {
@@ -40,15 +40,19 @@ export const useChessGame = () => {
         return capturedPieces
     }
 
-    const makeMove = (
-        move: ChessMove,
-        game: Chess,
-        stockfish?: React.MutableRefObject<Worker | null>
+    const makeMove: MakeMove = (
+        move,
+        game,
+        gameType,
+        stockfish?,
+        gameId = ''
     ) => {
         try {
+            console.log('gameId', gameId)
             game.move({ ...move, promotion: 'q' })
-            writeNewFen(move, playerColor)
-            if (stockfish) {
+            writeNewFen(move, playerColor, gameId)
+            if (gameType != 'multiplayer' && stockfish) {
+                console.log('got here')
                 stockfish.current?.postMessage('position fen ' + game.fen())
                 stockfish.current?.postMessage('go depth 8')
             }
@@ -98,3 +102,11 @@ export type ChessMove = {
     piece?: string
     promotion?: string
 }
+
+export type MakeMove = (
+    move: ChessMove,
+    game: Chess,
+    gameType: 'ai' | 'multiplayer',
+    stockfish?: React.MutableRefObject<Worker | null>,
+    gameId?: string
+) => void

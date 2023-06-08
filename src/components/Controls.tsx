@@ -9,6 +9,7 @@ const Controls = ({
     setPlayerColor,
     gameType,
     setGameType,
+    skipConfig,
 }: {
     undoMove: () => void
     resetGame: () => void
@@ -18,8 +19,9 @@ const Controls = ({
     setPlayerColor: React.Dispatch<React.SetStateAction<string>>
     gameType: 'ai' | 'multiplayer'
     setGameType: React.Dispatch<React.SetStateAction<'ai' | 'multiplayer'>>
+    skipConfig: boolean
 }) => {
-    const [showModal, setShowModal] = useState(true)
+    const [showModal, setShowModal] = useState(!skipConfig)
 
     return (
         <div className="flex flex-col items-center justify-center mt-10">
@@ -41,7 +43,7 @@ const Controls = ({
                     showModal ? '0' : '100'
                 }`}
             >
-                <UndoMove undoMove={undoMove} />
+                {gameType == 'ai' && <UndoMove undoMove={undoMove} />}
                 <NewGameButton setShowModal={setShowModal} />
             </div>
         </div>
