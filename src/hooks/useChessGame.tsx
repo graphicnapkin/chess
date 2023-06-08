@@ -48,7 +48,8 @@ export const useChessGame = (p: string) => {
         gameId = ''
     ) => {
         try {
-            console.log('gameId', gameId)
+            if (gameType == 'multiplayer' && game.turn() != playerColor) return
+
             game.move({ ...move, promotion: 'q' })
             writeNewFen(move, playerColor, gameId)
             if (gameType != 'multiplayer' && stockfish) {
