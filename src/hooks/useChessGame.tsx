@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Chess } from 'chess.js'
-import { writeNewFen } from '../firebase'
+import { writeMoveAndGameState } from '../firebase'
 
 export const useChessGame = (p: string) => {
     const [game] = useState(new Chess())
@@ -48,18 +48,25 @@ export const useChessGame = (p: string) => {
         gameId = ''
     ) => {
         try {
-            if (gameType == 'multiplayer' && game.turn() != playerColor) return
-
             game.move({ ...move, promotion: 'q' })
-            writeNewFen(move, playerColor, gameId)
+            // If it is a multiplayer game, and the player just made a move, write it to the database
+            if (gameType == 'multiplayer' && game.turn() != playerColor) {
+                writeMoveAndGameState(move, playerColor, gameId, game.fen())
+            }
+
+            // If it is the AI's turn, send stockfish the current game state and tell it to make a move
             if (gameType != 'multiplayer' && stockfish) {
                 console.log('got here')
                 stockfish.current?.postMessage('position fen ' + game.fen())
                 stockfish.current?.postMessage('go depth 8')
             }
+
+            // Update the captured pieces
             setCapturedPieces(getCapturedPieces(game))
+            // Update the game state
             setFen(game.fen())
 
+            // Check if the game is over
             if (game.isCheckmate()) {
                 setGameOver(true)
                 setGameResult('Checkmate!')
@@ -68,6 +75,7 @@ export const useChessGame = (p: string) => {
                 setGameResult('Draw!')
             }
         } catch (err) {
+            // If the move is illegal, log an error
             console.log(err)
         }
     }

@@ -5,11 +5,10 @@ import { ChessMove, type MakeMove } from './useChessGame'
 // Custom React hook to handle Stockfish AI integration.
 export const useStockfishWorker = (
     game: Chess, // The current game state
-    gameType: 'ai' | 'multiplayer', // The game type
     difficulty: number, // The difficulty level of the AI between 1-20
     playerColor: string,
     makeMove: MakeMove,
-    p: string | null
+    gameType: React.MutableRefObject<'ai' | 'multiplayer'>
 ) => {
     const stockfish = useRef<Worker | null>(null)
 
@@ -19,9 +18,9 @@ export const useStockfishWorker = (
             stockfish.current.terminate()
             console.log('Terminated stockfish')
         }
-        if (p) {
-            return
-        }
+
+        console.log('gameType', gameType.current)
+        if (gameType.current == 'multiplayer') return
 
         // Initialize the worker and set the skill level
         if (window.Worker) {
@@ -37,7 +36,7 @@ export const useStockfishWorker = (
             stockfish.current?.postMessage('position fen ' + game.fen())
             stockfish.current?.postMessage('go depth 9')
         }
-    }, [playerColor, difficulty])
+    }, [playerColor, difficulty, gameType.current])
 
     const stockfishMessage = (event: MessageEvent<any>) => {
         console.log('Stockfish said: ' + event.data)
@@ -51,7 +50,7 @@ export const useStockfishWorker = (
                 promote: 'q',
             }
 
-            makeMove(nextMove, game, gameType, stockfish, '')
+            makeMove(nextMove, game, 'ai', stockfish, '')
         }
     }
 

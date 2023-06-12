@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import Chessboard from 'chessboardjsx'
 import CapturedPieces from './components/CapturedPieces'
@@ -25,9 +25,11 @@ const App = () => {
         [key: string]: string
     }>({})
     const [difficulty, setDifficulty] = useState(5)
+
     const [gameType, setGameType] = useState<'ai' | 'multiplayer'>(
         'multiplayer'
     )
+    const gameTypeRef = useRef<'ai' | 'multiplayer'>(gameType)
 
     const {
         game,
@@ -44,17 +46,22 @@ const App = () => {
 
     const stockfish = useStockfishWorker(
         game,
-        gameType,
         difficulty,
         playerColor,
         makeMove,
-        multiplayerPlayerColor
+        gameTypeRef
     )
 
     // Get the game id from the url query string if it exists
 
     useEffect(() => {
-        if (gameType == 'ai') return
+        if (gameType == 'ai') {
+            gameTypeRef.current = 'ai'
+            return
+        }
+
+        if (gameTypeRef.current != 'multiplayer')
+            gameTypeRef.current = 'multiplayer'
         // Listen for changes to the game state in the database
         // and make the move if it exists
         const query = ref(db, '/' + gameId)
@@ -69,9 +76,7 @@ const App = () => {
                 makeMove(data.move, game, gameType, stockfish, gameId)
             }
         })
-    }, [])
-
-    // store the environment in a variable
+    }, [gameType])
 
     // Highlight the squares that the current piece can move to
     // if it is the current players turn and there are moves available

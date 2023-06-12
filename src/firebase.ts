@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase/app'
 import { getDatabase, ref, update } from 'firebase/database'
-import 'firebase/database'
 import { ChessMove } from './hooks/useChessGame'
 
 declare var process: {
@@ -11,6 +10,7 @@ declare var process: {
         REACT_APP_storageBucket: string
         REACT_APP_messagingSenderId: string
         REACT_APP_appId: string
+        REACT_APP_databaseURL: string
     }
 }
 
@@ -28,6 +28,7 @@ const firebaseConfig = {
     storageBucket: process.env.REACT_APP_storageBucket,
     messagingSenderId: process.env.REACT_APP_messagingSenderId,
     appId: process.env.REACT_APP_appId,
+    databaseURL: process.env.REACT_APP_databaseURL,
 }
 
 console.log('firebaseConfig', firebaseConfig)
@@ -35,15 +36,19 @@ console.log('firebaseConfig', firebaseConfig)
 initializeApp(firebaseConfig)
 export const db = getDatabase()
 
-export const writeNewFen = (
+console.log('db', db)
+
+export const writeMoveAndGameState = (
     move: ChessMove,
     playerColor: string,
-    gameId?: string
+    gameId: string,
+    fen: string
 ) => {
     // A post entry.
     const moveData = {
         move,
         playerColor,
+        fen,
     }
 
     // Write the new post's data simultaneously in the posts list and the user's post list.

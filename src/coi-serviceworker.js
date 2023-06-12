@@ -30,7 +30,7 @@
                           return (
                               r.set(
                                   'Cross-Origin-Embedder-Policy',
-                                  'require-corp'
+                                  'credentialless'
                               ),
                               r.set(
                                   'Cross-Origin-Opener-Policy',
