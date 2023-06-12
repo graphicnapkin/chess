@@ -12,6 +12,10 @@ import { db, newGameId } from './firebase'
 import { onValue, ref } from 'firebase/database'
 import { WHITE, BLACK } from './constants'
 
+// TODO: Highlight the last move
+// TODO: Prevent the user from making a move if it is not their turn
+// TODO: Add a timer
+
 const App = () => {
     const location = useLocation()
     const searchParams = new URLSearchParams(location.search)
