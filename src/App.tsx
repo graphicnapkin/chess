@@ -8,10 +8,9 @@ import InfoDisplay from './components/InfoDisplay'
 import { ChessMove, useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
 import { type Square } from 'chess.js'
-import { db } from './firebase'
-import { child, onValue, push, ref } from 'firebase/database'
-
-const newGameId = push(child(ref(db), 'games')).key
+import { db, newGameId } from './firebase'
+import { onValue, ref } from 'firebase/database'
+import { WHITE, BLACK } from './constants'
 
 const App = () => {
     const location = useLocation()
@@ -42,7 +41,7 @@ const App = () => {
         playerColor,
         setPlayerColor,
         capturedPieces,
-    } = useChessGame(multiplayerPlayerColor || 'w')
+    } = useChessGame(multiplayerPlayerColor || WHITE)
 
     const stockfish = useStockfishWorker(
         game,
@@ -104,7 +103,7 @@ const App = () => {
         setHighLightStyles(highLightStyles)
     }
 
-    const currentTurn = game.turn() === 'w' ? 'White' : 'Black'
+    const currentTurn = game.turn() === WHITE ? 'White' : 'Black'
 
     const handleMove = (move: {
         sourceSquare: string
@@ -138,7 +137,9 @@ const App = () => {
                 <Link
                     to={`${
                         isDev ? 'localhost:9000' : 'https://graphicnapkin.com'
-                    }/?id=${gameId}&color=${playerColor == 'w' ? 'b' : 'w'}`}
+                    }/?id=${gameId}&color=${
+                        playerColor == WHITE ? BLACK : WHITE
+                    }`}
                 >
                     <span style={linkStyle}>Share Link with Friend</span>
                 </Link>
@@ -151,7 +152,7 @@ const App = () => {
             />
             <CapturedPieces
                 pieces={capturedPieces}
-                color={playerColor == 'w' ? 'w' : 'b'}
+                color={playerColor == WHITE ? WHITE : BLACK}
             />
             <br />
             <Chessboard
@@ -163,7 +164,7 @@ const App = () => {
                 darkSquareStyle={{ backgroundColor: 'CornFlowerBlue' }}
                 position={fen}
                 draggable={true}
-                orientation={playerColor == 'w' ? 'white' : 'black'}
+                orientation={playerColor == WHITE ? 'white' : 'black'}
                 onDrop={handleMove}
                 calcWidth={({ screenWidth }) => (screenWidth < 500 ? 350 : 480)}
                 onMouseOverSquare={handleMouseOverSquare}
@@ -173,7 +174,7 @@ const App = () => {
             <br />
             <CapturedPieces
                 pieces={capturedPieces}
-                color={playerColor == 'w' ? 'b' : 'w'}
+                color={playerColor == WHITE ? BLACK : WHITE}
             />
             <Controls
                 undoMove={undoMove}

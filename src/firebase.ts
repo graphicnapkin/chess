@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getDatabase, ref, update } from 'firebase/database'
+import { getDatabase, ref, update, push, child } from 'firebase/database'
 import { ChessMove } from './hooks/useChessGame'
 
 declare var process: {
@@ -35,8 +35,7 @@ console.log('firebaseConfig', firebaseConfig)
 // Initialize Firebase
 initializeApp(firebaseConfig)
 export const db = getDatabase()
-
-console.log('db', db)
+export const newGameId = push(child(ref(db), 'games')).key
 
 export const writeMoveAndGameState = (
     move: ChessMove,

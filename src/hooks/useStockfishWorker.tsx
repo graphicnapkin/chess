@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Chess } from 'chess.js'
-import { ChessMove, type MakeMove } from './useChessGame'
+import { type MakeMove } from './useChessGame'
 
 // Custom React hook to handle Stockfish AI integration.
 export const useStockfishWorker = (
@@ -16,10 +16,8 @@ export const useStockfishWorker = (
         // Terminate the worker if it exists which prevents memory leaks
         if (stockfish.current) {
             stockfish.current.terminate()
-            console.log('Terminated stockfish')
         }
 
-        console.log('gameType', gameType.current)
         if (gameType.current == 'multiplayer') return
 
         // Initialize the worker and set the skill level
@@ -39,8 +37,6 @@ export const useStockfishWorker = (
     }, [playerColor, difficulty, gameType.current])
 
     const stockfishMessage = (event: MessageEvent<any>) => {
-        console.log('Stockfish said: ' + event.data)
-
         // If the AI is done calculating a move, make it
         if (game.turn() != playerColor && event.data.includes('bestmove')) {
             const bestMove = event.data.split(' ')[1]
