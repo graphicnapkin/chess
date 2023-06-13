@@ -1,7 +1,4 @@
-# chess
-Side project chess game with stockfish AI
 # Chess Game Application
-
 A Chess game application built with React, Chessboardjsx and Stockfish, with options to play against an AI or a friend in multiplayer mode. It uses Firebase for the backend to handle multiplayer games.
 
 ## Features
@@ -25,7 +22,7 @@ npm install
 
 ## Configuration
 
-This project uses Firebase for managing multiplayer games. Please setup your Firebase project and copy your Firebase SDK snippet to a new `.env` file. Refer to `.env.example` for the required format.
+This project uses Firebase for managing multiplayer games. Please setup your Firebase project and copy your Firebase SDK snippet to a new `.env` file. Refer to `TBI` for the required format.
 
 ## Running the application
 
@@ -77,3 +74,4 @@ MIT License
 ## Author
 
 This project is authored by [Graphicnapkin](https://github.com/graphicnapkin). For any questions, feel free to open an issue on GitHub or contact the author.
+Yes, I did use chatGPT to write this Readme.md (and a good amount of the initial app code.
