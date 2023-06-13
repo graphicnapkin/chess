@@ -1,4 +1,4 @@
-# Chess Game Application
+# GNAPS Chess Game
 A Chess game application built with React, Chessboardjsx and Stockfish, with options to play against an AI or a friend in multiplayer mode. It uses Firebase for the backend to handle multiplayer games.
 
 ## Features
