@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { Chess } from 'chess.js'
+import { Chess, Move, Square } from 'chess.js'
 import { writeMoveAndGameState } from '../firebase'
 import { BLACK, WHITE } from '../constants'
 
-export const useChessGame = (initialPlayerColor: string) => {
+export const useChessGame = (
+    initialPlayerColor: string,
+    setLastMoveStyles: React.Dispatch<
+        React.SetStateAction<{ [key: string]: { [k: string]: string } }>
+    >,
+    setHighLightStyles: React.Dispatch<
+        React.SetStateAction<{ [key: string]: string }>
+    >
+) => {
     const [game] = useState(new Chess())
     const [fen, setFen] = useState('start')
     const [gameOver, setGameOver] = useState(false)
@@ -40,6 +48,42 @@ export const useChessGame = (initialPlayerColor: string) => {
         return capturedPieces
     }
 
+    const setLastMoveHighlight = (from: string, to: string) => {
+        setLastMoveStyles({
+            [from]: lastMoveStyle,
+            [to]: lastMoveStyle,
+        })
+    }
+
+    // Highlight the squares that the current piece can move to
+    // if it is the current players turn and there are moves available
+    const handleMouseOverSquare = (square: Square) => {
+        // don't apply styles when it's the other players turn
+        if (playerColor != game.turn()) return
+
+        const highlightSquareStyles = {
+            // Customize the style for the highlighted squares
+            boxShadow: 'inset 0 0 0 4px ' + highlightColor,
+        }
+        const moves = game.moves({
+            square: square,
+            verbose: true,
+        })
+
+        if (moves.length === 0) return
+
+        const squares = moves.map((move) => move.to)
+        const highLightStyles = squares.reduce((a, c) => {
+            return {
+                ...a,
+                ...{
+                    [c]: highlightSquareStyles,
+                },
+            }
+        }, {})
+        setHighLightStyles(highLightStyles)
+    }
+
     const makeMove: MakeMove = (
         move,
         game,
@@ -48,7 +92,7 @@ export const useChessGame = (initialPlayerColor: string) => {
         gameId = ''
     ) => {
         try {
-            game.move({ ...move, promotion: 'q' })
+            const sucessfulMove = game.move({ ...move, promotion: 'q' })
             // If it is a multiplayer game, and the player just made a move, write it to the database
             if (gameType == 'multiplayer' && game.turn() != playerColor) {
                 writeMoveAndGameState(move, playerColor, gameId, game.fen())
@@ -72,6 +116,10 @@ export const useChessGame = (initialPlayerColor: string) => {
             } else if (game.isDraw()) {
                 setGameOver(true)
                 setGameResult('Draw!')
+            }
+
+            if (sucessfulMove) {
+                setLastMoveHighlight(move.from, move.to)
             }
         } catch (err) {
             // If the move is illegal, log an error
@@ -101,6 +149,7 @@ export const useChessGame = (initialPlayerColor: string) => {
         playerColor,
         setPlayerColor,
         capturedPieces,
+        handleMouseOverSquare,
     }
 }
 
@@ -118,3 +167,6 @@ export type MakeMove = (
     stockfish?: React.MutableRefObject<Worker | null>,
     gameId?: string
 ) => void
+
+const highlightColor = 'rgba(167, 255, 0, 0.5)'
+const lastMoveStyle = { backgroundColor: highlightColor }

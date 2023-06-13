@@ -7,32 +7,42 @@ import InfoDisplay from './components/InfoDisplay'
 
 import { ChessMove, useChessGame } from './hooks/useChessGame'
 import { useStockfishWorker } from './hooks/useStockfishWorker'
-import { type Square } from 'chess.js'
 import { db, newGameId } from './firebase'
 import { onValue, ref } from 'firebase/database'
-import { WHITE, BLACK } from './constants'
+import { WHITE, BLACK, AI, MULTIPLAYER } from './constants'
 
-// TODO: Highlight the last move
-// TODO: Prevent the user from making a move if it is not their turn
 // TODO: Add a timer
+// TODO: Instead of auto promoting to a queen, allow the user to select the piece to promote to
+// TODO: Add authentication either through Firebase or Clerk
+// TODO: Restrict access to the database to only allow authenticated users to make changes
+// TODO: Restrict access to the database to only allow the two players to make changes to the a given game
+// TODO: Better styling for potential moves
+
+// Improvements:
+// - Refactor stockfish implementation to be more straightforward like https://chessboardjsx.com/integrations/move-validation
 
 const App = () => {
+    // Get the game id and player color from the url query string
     const location = useLocation()
     const searchParams = new URLSearchParams(location.search)
-    // get playerColor from params if it exists
     const multiplayerPlayerColor = searchParams.get('color')
-    // get gameId from params if it exists or create a new one
     let gameId = searchParams.get('id') || newGameId || 'error'
 
+    // Get a reference to the game in the database
+    const query = ref(db, '/' + gameId)
+
+    // styles for highlighting squares
     const [highLightStyles, setHighLightStyles] = useState<{
         [key: string]: string
     }>({})
-    const [difficulty, setDifficulty] = useState(5)
+    const [lastMoveStyles, setLastMoveStyles] = useState<{
+        [key: string]: { [k: string]: string }
+    }>({})
 
-    const [gameType, setGameType] = useState<'ai' | 'multiplayer'>(
-        'multiplayer'
-    )
-    const gameTypeRef = useRef<'ai' | 'multiplayer'>(gameType)
+    // game settings
+    const [difficulty, setDifficulty] = useState(5)
+    const [gameType, setGameType] = useState<GameType>(MULTIPLAYER)
+    const gameTypeRef = useRef<GameType>(gameType)
 
     const {
         game,
@@ -45,7 +55,12 @@ const App = () => {
         playerColor,
         setPlayerColor,
         capturedPieces,
-    } = useChessGame(multiplayerPlayerColor || WHITE)
+        handleMouseOverSquare,
+    } = useChessGame(
+        multiplayerPlayerColor || WHITE,
+        setLastMoveStyles,
+        setHighLightStyles
+    )
 
     const stockfish = useStockfishWorker(
         game,
@@ -55,92 +70,59 @@ const App = () => {
         gameTypeRef
     )
 
-    // Get the game id from the url query string if it exists
+    const currentTurn = game.turn() === WHITE ? 'White' : 'Black'
 
     useEffect(() => {
-        if (gameType == 'ai') {
-            gameTypeRef.current = 'ai'
+        if (gameType == AI) {
+            gameTypeRef.current = AI
             return
         }
 
-        if (gameTypeRef.current != 'multiplayer')
-            gameTypeRef.current = 'multiplayer'
+        if (gameTypeRef.current != MULTIPLAYER) {
+            gameTypeRef.current = MULTIPLAYER
+        }
         // Listen for changes to the game state in the database
         // and make the move if it exists
-        const query = ref(db, '/' + gameId)
         return onValue(query, (snapshot) => {
             const data = snapshot.val() as {
                 move: ChessMove
                 playerColor: string
             }
             if (snapshot.exists()) {
-                console.log(data)
-
+                if (data.playerColor == playerColor) return
                 makeMove(data.move, game, gameType, stockfish, gameId)
             }
         })
     }, [gameType])
-
-    // Highlight the squares that the current piece can move to
-    // if it is the current players turn and there are moves available
-    const handleMouseOverSquare = (square: Square) => {
-        const highlightSquareStyles = {
-            // Customize the style for the highlighted squares
-            boxShadow: 'inset 0 0 0 4px rgba(255, 255, 0, 0.6)',
-        }
-        const moves = game.moves({
-            square: square,
-            verbose: true,
-        })
-
-        if (moves.length === 0) return
-
-        const squares = moves.map((move) => move.to)
-        const highLightStyles = squares.reduce((a, c) => {
-            return {
-                ...a,
-                ...{
-                    [c]: highlightSquareStyles,
-                },
-            }
-        }, {})
-        setHighLightStyles(highLightStyles)
-    }
-
-    const currentTurn = game.turn() === WHITE ? 'White' : 'Black'
 
     const handleMove = (move: {
         sourceSquare: string
         targetSquare: string
         piece: string
     }) => {
-        makeMove(
-            {
-                from: move.sourceSquare,
-                to: move.targetSquare,
-                piece: move.piece,
-            },
-            game,
-            gameType,
-            stockfish,
-            gameId || ''
+        const moveArgument = {
+            from: move.sourceSquare,
+            to: move.targetSquare,
+            promote: 'q',
+        }
+        if (
+            playerColor != game.turn() ||
+            move.sourceSquare == move.targetSquare
         )
-    }
+            return
 
-    const isDev = process.env.NODE_ENV === 'development'
-    const linkStyle = {
-        color: 'blue',
-        textDecoration: 'underline',
-        cursor: 'pointer',
+        makeMove(moveArgument, game, gameType, stockfish, gameId || '')
     }
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
             <h1>Game Mode: {gameType}</h1>
-            {!multiplayerPlayerColor && gameType != 'ai' && (
+            {!multiplayerPlayerColor && gameType != AI && (
                 <Link
                     to={`${
-                        isDev ? 'localhost:9000' : 'https://graphicnapkin.com'
+                        process.env.NODE_ENV === 'development'
+                            ? 'localhost:9000'
+                            : 'https://graphicnapkin.com'
                     }/?id=${gameId}&color=${
                         playerColor == WHITE ? BLACK : WHITE
                     }`}
@@ -167,13 +149,13 @@ const App = () => {
                 lightSquareStyle={{ backgroundColor: 'AliceBlue' }}
                 darkSquareStyle={{ backgroundColor: 'CornFlowerBlue' }}
                 position={fen}
-                draggable={true}
+                draggable={playerColor == game.turn() && !gameOver}
                 orientation={playerColor == WHITE ? 'white' : 'black'}
                 onDrop={handleMove}
                 calcWidth={({ screenWidth }) => (screenWidth < 500 ? 350 : 480)}
                 onMouseOverSquare={handleMouseOverSquare}
                 onMouseOutSquare={() => setHighLightStyles({})}
-                squareStyles={highLightStyles}
+                squareStyles={{ ...highLightStyles, ...lastMoveStyles }}
             />
             <br />
             <CapturedPieces
@@ -182,7 +164,11 @@ const App = () => {
             />
             <Controls
                 undoMove={undoMove}
-                resetGame={() => resetGame(stockfish)}
+                resetGame={() => {
+                    setHighLightStyles({})
+                    setLastMoveStyles({})
+                    resetGame(stockfish)
+                }}
                 difficulty={difficulty}
                 setDifficulty={setDifficulty}
                 playerColor={playerColor}
@@ -201,5 +187,13 @@ const App = () => {
         </main>
     )
 }
+
+const linkStyle = {
+    color: 'blue',
+    textDecoration: 'underline',
+    cursor: 'pointer',
+}
+
+type GameType = 'ai' | 'multiplayer'
 
 export default App
