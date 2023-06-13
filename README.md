@@ -5,10 +5,10 @@ A Chess game application built with React, Chessboardjsx and Stockfish, with opt
 
 - Play against an AI or a friend in multiplayer mode.
 - AI difficulty level can be adjusted.
-- Undo previous moves.
+- Undo previous moves (in AI mode).
 - Live update of captured pieces.
 - Visual feedback for available piece moves.
-- Hosted games with unique IDs.
+- Hosted games with unique IDs (in Multiplayer mode).
 
 ## Installation
 
