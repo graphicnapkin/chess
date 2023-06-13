@@ -12,8 +12,9 @@ import { onValue, ref } from 'firebase/database'
 import { WHITE, BLACK, AI, MULTIPLAYER } from './constants'
 
 // TODO: Add a timer
+// TODO: Hide difficulty setting when gameType is multiplayer
 // TODO: Instead of auto promoting to a queen, allow the user to select the piece to promote to
-// TODO: Add authentication either through Firebase or Clerk
+// TODO: Add authentication through Firebase for the game and the database - https://firebase.google.com/docs/auth/web/firebaseui
 // TODO: Restrict access to the database to only allow authenticated users to make changes
 // TODO: Restrict access to the database to only allow the two players to make changes to the a given game
 // TODO: Better styling for potential moves
