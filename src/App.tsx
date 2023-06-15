@@ -10,7 +10,6 @@ import { useStockfishWorker } from './hooks/useStockfishWorker'
 import { db, newGameId } from './firebase'
 import { onValue, ref } from 'firebase/database'
 import { WHITE, BLACK, AI, MULTIPLAYER } from './constants'
-import GoogleAuth from './components/GoogleAuth'
 import {
     GoogleAuthProvider,
     getRedirectResult,
