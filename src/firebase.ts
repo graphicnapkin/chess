@@ -2,12 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { getDatabase, ref, update, push, child } from 'firebase/database'
 import { ChessMove } from './hooks/useChessGame'
 
-import {
-    GoogleAuthProvider,
-    getAuth,
-    signInWithRedirect,
-    getRedirectResult,
-} from 'firebase/auth'
+import { getAuth } from 'firebase/auth'
 
 declare var process: {
     env: {

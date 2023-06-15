@@ -11,6 +11,12 @@ import { db, newGameId } from './firebase'
 import { onValue, ref } from 'firebase/database'
 import { WHITE, BLACK, AI, MULTIPLAYER } from './constants'
 import GoogleAuth from './components/GoogleAuth'
+import {
+    GoogleAuthProvider,
+    getRedirectResult,
+    signInWithRedirect,
+} from 'firebase/auth'
+import { auth } from './firebase'
 
 // TODO: Add a timer
 // TODO: Instead of auto promoting to a queen, allow the user to select the piece to promote to
@@ -84,6 +90,18 @@ const App = () => {
     const currentTurn = game.turn() === WHITE ? 'White' : 'Black'
 
     useEffect(() => {
+        console.log('running auth use effect')
+        ;(async () => {
+            const provider = new GoogleAuthProvider()
+
+            await signInWithRedirect(auth, provider)
+            const result = await getRedirectResult(auth)
+            console.log('result', result)
+            console.log('why')
+        })()
+    }, []) // Run this once after component mounted.
+
+    useEffect(() => {
         if (gameType == AI) {
             gameTypeRef.current = AI
             return
@@ -124,8 +142,6 @@ const App = () => {
 
         makeMove(moveArgument, game, gameType, stockfish, gameId || '')
     }
-
-    return <GoogleAuth />
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
