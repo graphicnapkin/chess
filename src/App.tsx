@@ -10,17 +10,27 @@ import { useStockfishWorker } from './hooks/useStockfishWorker'
 import { db, newGameId } from './firebase'
 import { onValue, ref } from 'firebase/database'
 import { WHITE, BLACK, AI, MULTIPLAYER } from './constants'
+import GoogleAuth from './components/GoogleAuth'
 
 // TODO: Add a timer
-// TODO: Hide difficulty setting when gameType is multiplayer
 // TODO: Instead of auto promoting to a queen, allow the user to select the piece to promote to
 // TODO: Add authentication through Firebase for the game and the database - https://firebase.google.com/docs/auth/web/firebaseui
 // TODO: Restrict access to the database to only allow authenticated users to make changes
 // TODO: Restrict access to the database to only allow the two players to make changes to the a given game
-// TODO: Better styling for potential moves
 
-// Improvements:
+// Nice to haves:
 // - Refactor stockfish implementation to be more straightforward like https://chessboardjsx.com/integrations/move-validation
+// - Better styling for potential moves
+// - Better styling for last move
+// - Better styling for captured pieces
+// - Better styling for game over
+// - Better styling for game result
+// - Better styling for controls
+// - Better styling for info display
+// - Better styling for footer
+// - Better styling for share link
+// - Better styling for new game button
+// - Better styling for difficulty select
 
 const App = () => {
     // Get the game id and player color from the url query string
@@ -114,6 +124,8 @@ const App = () => {
 
         makeMove(moveArgument, game, gameType, stockfish, gameId || '')
     }
+
+    return <GoogleAuth />
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

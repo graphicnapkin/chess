@@ -2,6 +2,13 @@ import { initializeApp } from 'firebase/app'
 import { getDatabase, ref, update, push, child } from 'firebase/database'
 import { ChessMove } from './hooks/useChessGame'
 
+import {
+    GoogleAuthProvider,
+    getAuth,
+    signInWithRedirect,
+    getRedirectResult,
+} from 'firebase/auth'
+
 declare var process: {
     env: {
         REACT_APP_apiKey: string
@@ -31,8 +38,13 @@ const firebaseConfig = {
     databaseURL: process.env.REACT_APP_databaseURL,
 }
 
-// Initialize Firebase
+// Initialize Firebase App
 initializeApp(firebaseConfig)
+
+//  Initialize Firebase Auth
+export const auth = getAuth()
+
+// Initialize Firebase Database
 export const db = getDatabase()
 export const newGameId = push(child(ref(db), 'games')).key
 

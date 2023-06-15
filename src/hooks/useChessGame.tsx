@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Chess, Move, Square } from 'chess.js'
+import { Chess, Square } from 'chess.js'
 import { writeMoveAndGameState } from '../firebase'
 import { BLACK, WHITE } from '../constants'
 

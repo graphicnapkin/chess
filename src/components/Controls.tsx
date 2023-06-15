@@ -75,57 +75,15 @@ const NewGameConfig = ({
 
     return (
         <section className="fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-4 max-w-sm w-300">
+            <div className="bg-white rounded-lg p-4 max-w-sm w-300 h-[250px]">
                 <div className="flex flex-col items-start">
-                    <div className="flex items-center w-full">
+                    <div className="flex pb-4 items-center w-full">
                         <div className="text-gray-900 font-medium text-lg mr-4">
                             Game Settings
                         </div>
                         {closeIcon(setShowModal)}
                     </div>
-                    <Option label="Difficulty: ">
-                        <select
-                            id="difficulty"
-                            className="block text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                            value={tempDifficulty}
-                            onChange={(e) =>
-                                setTempDifficulty(parseInt(e.target.value))
-                            }
-                        >
-                            {Array.from({ length: 11 }, (_, i) => i).map(
-                                (value) => (
-                                    <option key={value} value={value}>
-                                        {value}
-                                    </option>
-                                )
-                            )}
-                        </select>
-                    </Option>
-                    <Option label="Player Color: ">
-                        <input
-                            id="playerColorWhite"
-                            type="radio"
-                            name="playerColor"
-                            value="w"
-                            checked={tempColor == 'w'}
-                            className="mr-1"
-                            onChange={(e) => setTempColor(e.target.value)}
-                        />
-                        <label htmlFor="playerColorWhite" className="mr-4">
-                            White
-                        </label>
-                        <input
-                            id="playerColorBlack"
-                            type="radio"
-                            name="playerColor"
-                            value="b"
-                            checked={tempColor == 'b'}
-                            className="mr-1"
-                            onChange={(e) => setTempColor(e.target.value)}
-                        />
-                        <label htmlFor="playerColorBlack">Black</label>
-                    </Option>
-                    <Option label="Opponent: ">
+                    <Option label="Mode: ">
                         <input
                             id="gameTypeAi"
                             type="radio"
@@ -157,6 +115,56 @@ const NewGameConfig = ({
                         />
                         <label htmlFor="gameTypeMultiplayer">Multiplayer</label>
                     </Option>
+                    <Option label="Player Color: ">
+                        <input
+                            id="playerColorWhite"
+                            type="radio"
+                            name="playerColor"
+                            value="w"
+                            checked={tempColor == 'w'}
+                            className="mr-1"
+                            onChange={(e) => setTempColor(e.target.value)}
+                        />
+                        <label htmlFor="playerColorWhite" className="mr-4">
+                            White
+                        </label>
+                        <input
+                            id="playerColorBlack"
+                            type="radio"
+                            name="playerColor"
+                            value="b"
+                            checked={tempColor == 'b'}
+                            className="mr-1"
+                            onChange={(e) => setTempColor(e.target.value)}
+                        />
+                        <label htmlFor="playerColorBlack">Black</label>
+                    </Option>
+                    {tempGameType === 'ai' && (
+                        <Option label="Difficulty: ">
+                            <select
+                                id="difficulty"
+                                className="block text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                value={tempDifficulty}
+                                onChange={(e) =>
+                                    setTempDifficulty(parseInt(e.target.value))
+                                }
+                            >
+                                {Array.from({ length: 11 }, (_, i) => i).map(
+                                    (value) => (
+                                        <option key={value} value={value}>
+                                            {value}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+                        </Option>
+                    )}
+                    {tempGameType === 'multiplayer' && (
+                        <Option label="">
+                            <span className="invisible">.</span>
+                        </Option>
+                    )}
+
                     <hr className="my-3" />
                     <div className="flex w-full justify-center space-x-3">
                         <button
@@ -189,7 +197,7 @@ const Option = ({
         <div className="flex items-center">
             <hr className="my-3" />
             <div className="py-1 flex items-center justify-between">
-                <label htmlFor="difficulty" className="mr-8">
+                <label htmlFor={label} className="mr-8">
                     <b>{label}</b>
                 </label>
                 {children}
