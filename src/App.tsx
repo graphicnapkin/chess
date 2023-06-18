@@ -10,12 +10,8 @@ import { useStockfishWorker } from './hooks/useStockfishWorker'
 import { db, newGameId } from './firebase'
 import { onValue, ref } from 'firebase/database'
 import { WHITE, BLACK, AI, MULTIPLAYER } from './constants'
-import {
-    GoogleAuthProvider,
-    getRedirectResult,
-    signInWithRedirect,
-} from 'firebase/auth'
-import { auth } from './firebase'
+import { User } from 'firebase/auth'
+import FirebaseAuth from './components/FirebaseAuth'
 
 // TODO: Add a timer
 // TODO: Instead of auto promoting to a queen, allow the user to select the piece to promote to
@@ -60,6 +56,8 @@ const App = () => {
     const [gameType, setGameType] = useState<GameType>(MULTIPLAYER)
     const gameTypeRef = useRef<GameType>(gameType)
 
+    const [user, setUser] = useState<User | undefined>()
+
     const {
         game,
         resetGame,
@@ -87,18 +85,6 @@ const App = () => {
     )
 
     const currentTurn = game.turn() === WHITE ? 'White' : 'Black'
-
-    useEffect(() => {
-        console.log('running auth use effect')
-        ;(async () => {
-            const provider = new GoogleAuthProvider()
-
-            await signInWithRedirect(auth, provider)
-            const result = await getRedirectResult(auth)
-            console.log('result', result)
-            console.log('why')
-        })()
-    }, []) // Run this once after component mounted.
 
     useEffect(() => {
         if (gameType == AI) {
@@ -206,6 +192,7 @@ const App = () => {
                 skipConfig={multiplayerPlayerColor ? true : false}
             />
             <footer>
+                <FirebaseAuth user={user} setUser={setUser} />
                 Checkout this project on
                 <Link to="https://github.com/graphicnapkin/chess">
                     {' '}

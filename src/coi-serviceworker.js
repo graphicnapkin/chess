@@ -19,6 +19,9 @@
                       e.forEach((e) => e.navigate(e.url))
                   })
       }),
+      // this block needs to be commented out in order for Auth to work
+      // This is because same-origin is required for Stockfish to work due to needing SharedArrayBuffers
+      // however same-origin is not compatible with Firebase auth due to the response coming from a different origin
       self.addEventListener('fetch', function (e) {
           ;('only-if-cached' === e.request.cache &&
               'same-origin' !== e.request.mode) ||
