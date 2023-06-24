@@ -166,7 +166,10 @@ const App = () => {
                 draggable={playerColor == game.turn() && !gameOver}
                 orientation={playerColor == WHITE ? 'white' : 'black'}
                 onDrop={handleMove}
-                calcWidth={({ screenWidth }) => (screenWidth < 500 ? 350 : 480)}
+                calcWidth={({ screenWidth, screenHeight }) => {
+                    return Math.min(screenHeight, screenWidth) * .75
+                }
+                }
                 onMouseOverSquare={handleMouseOverSquare}
                 onMouseOutSquare={() => setHighLightStyles({})}
                 squareStyles={{ ...highLightStyles, ...lastMoveStyles }}
