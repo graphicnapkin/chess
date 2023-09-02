@@ -4,7 +4,6 @@ import {
     User,
     getRedirectResult,
     signInWithPopup,
-    signInWithRedirect,
 } from 'firebase/auth'
 import { auth } from '../firebase'
 
@@ -30,8 +29,29 @@ const GoogleAuth = ({
         const provider = new GoogleAuthProvider()
         provider.addScope('profile')
         provider.addScope('email')
-        //signInWithPopup(auth, provider)
-        signInWithRedirect(auth, provider)
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                // This gives you a Google Access Token. You can use it to access the Google API.
+                var token = result.user.getIdToken()
+                // The signed-in user info.
+                var user = result.user
+                // ...
+            })
+            .catch((error) => {
+                // Handle Errors here.
+                var errorCode = error.code
+                var errorMessage = error.message
+                // The email of the user's account used.
+                var email = error.email
+                // The firebase.auth.AuthCredential type that was used.
+                var credential = error.credential
+                console.log('errorCode:', errorCode)
+                console.log('errorMessage:', errorMessage)
+                console.log('email:', email)
+                console.log('credential:', credential)
+                // ...
+            })
+        //signInWithRedirect(auth, provider)
     }
 
     const signOut = async () => {

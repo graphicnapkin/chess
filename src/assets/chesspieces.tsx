@@ -722,3 +722,19 @@ export default {
         </svg>
     ),
 }
+
+// map of pieces to their values using the same format from above "wP": 1, "bN": 3, etc.
+export const pieceValues = {
+    wP: 1,
+    wN: 3,
+    wB: 3,
+    wR: 5,
+    wQ: 9,
+    wK: 1000,
+    bP: -1,
+    bN: -3,
+    bB: -3,
+    bR: -5,
+    bQ: -9,
+    bK: -1000,
+}
