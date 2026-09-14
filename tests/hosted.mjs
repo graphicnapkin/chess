@@ -62,6 +62,12 @@ try {
  const bad=await clients[0].client.functions.invoke('game',{body:{action:'move',id,version:3,from:'e4',to:'e6'}})
  assert.ok(bad.error)
  console.log('PASS: refresh recovery, seat protection, outsider RLS, direct-write/RPC denial and illegal-move rejection')
+ await contexts[1].setOffline(true)
+ const simultaneous=await Promise.all([0,1].map(()=>clients[0].client.functions.invoke('game',{body:{action:'move',id,version:3,from:'g1',to:'f3'}})))
+ assert.equal(simultaneous.filter(result=>!result.error).length,1)
+ await contexts[1].setOffline(false)
+ await second.locator('.move-list').filter({hasText:'Nf3'}).waitFor({timeout:20000})
+ console.log('PASS: concurrent duplicate submissions commit once; offline opponent recovers on reconnect')
  await first.screenshot({path:'artifacts/hosted-multiplayer.png',fullPage:true})
 } finally {
  await browser?.close()

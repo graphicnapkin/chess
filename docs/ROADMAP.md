@@ -14,7 +14,7 @@
 - DONE: migration and function deployed to mtcibrvwekegkvcjqlwf.
 - DONE: local and Vercel Preview public variables configured; production variables pending release.
 - Create/configure Google and GitHub OAuth clients; inspect Google IAM/billing.
-- DONE: two-user hosted gameplay, refresh, Realtime, outsider RLS, direct write/RPC denial and illegal moves verified. OAuth provider flow still pending.
+- DONE: two-user hosted gameplay, refresh, Realtime, outsider RLS, direct write/RPC denial, illegal moves, concurrent duplicate rejection and offline reconnect verified. OAuth provider flow still pending.
 - Review preview and release to production.
 
 ## Later polish
