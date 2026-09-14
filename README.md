@@ -1,78 +1,42 @@
-# GNAP's Chess Game
+# GNAP Chess
 
-A Chess game application built with React, Chessboardjsx and Stockfish, with options to play against an AI or a friend in multiplayer mode. It uses Firebase for the backend to handle multiplayer games.
+React/TypeScript chess with Stockfish running in a browser Web Worker. Node 24 is used to build the frontend. Supabase provides optional multiplayer and Google/GitHub login; computer games work without backend configuration.
 
-## Features
+## Develop
 
--   Play against an AI or a friend in multiplayer mode.
--   AI difficulty level can be adjusted.
--   Undo previous moves (in AI mode).
--   Live update of captured pieces.
--   Visual feedback for available piece moves.
--   Hosted games with unique IDs (in Multiplayer mode).
+Use Node 24 (`.nvmrc` / `.node-version`).
 
-## Installation
-
-You need Node.js and npm installed on your machine. Clone this repository and install dependencies.
-
-```bash
-git clone https://github.com/graphicnapkin/chess.git
-cd chess
-npm install
-```
-
-## Configuration
-
-This project uses Firebase for managing multiplayer games. Please setup your Firebase project and copy your Firebase SDK snippet to a new `.env` file. Refer to `TBI` for the required format.
-
-## Running the application
-
-After installation and configuration, run the development server:
-
-```bash
+```sh
+npm ci
 npm start
 ```
 
-Your application should now be running on [http://localhost:9000](http://localhost:9000).
+Open http://localhost:9000. Production verification:
 
-## Application Structure
+```sh
+npm run build
+npm test
+npm run test:browser
+```
 
-The application contains several components:
+Install Chromium once with `npx playwright install chromium`. `npm run preview` serves the production artifact at http://127.0.0.1:9001. Browser tests use the real bundled Stockfish engine.
 
--   **App.tsx:** This is the main component of the application. It manages the game settings, displays the chess board and controls, and coordinates the interaction between the game logic and the Firebase database.
+## Deploy and configure
 
--   **useChessGame.tsx:** This hook manages the state of the game using the chess.js library. It updates the game after each move, checks the game status, and handles user interaction such as highlighting potential moves and undoing moves.
+Vercel builds with Node 24 and serves `build/`, as specified in `vercel.json`. The asset script copies the existing Stockfish JS/WASM into the output; it does not compile a new engine. `dist/stockfish/` retains the upstream source and license from the original repository. The other historical `dist/` files are not the deployment output.
 
--   **useStockfishWorker.tsx:** This hook manages the communication between the Stockfish chess engine running in a web worker and the game. It interprets the chess engine's output and updates the game accordingly.
+Local AI play requires no environment variables. To enable online play, copy `.env.example` to `.env` and configure only the public Supabase URL and publishable key. Never put a service-role key or OAuth client secret into frontend variables.
 
-The application also contains several smaller components:
+See [Supabase and OAuth setup](docs/SETUP.md), [architecture](docs/ARCHITECTURE.md), and [remaining work](docs/ROADMAP.md).
 
--   **Chessboard:** This component displays the current state of the game and allows players to make moves.
--   **CapturedPieces:** This component displays the pieces that have been captured so far in the game.
--   **Controls:** This component allows players to undo moves, reset the game, and change settings such as the AI difficulty, the player's color, and the game type.
--   **InfoDisplay:** This component displays the current game status.
+## Current features
 
-## Future Improvements
+- Real Stockfish AI, color/difficulty selection, undo, reset, and session recovery.
+- Drag, click, or keyboard move entry; selectable pawn promotion.
+- Captured pieces, move history, and PGN download.
+- Supabase-backed invitations, assigned player seats, validated moves, and reconnect snapshots (requires hosted setup).
+- Full-page Google/GitHub OAuth redirects with PKCE (requires provider setup).
 
-The following improvements are planned:
+## Licensing
 
--   Implement a timer.
--   Hide difficulty setting when gameType is multiplayer.
--   Instead of auto promoting to a queen, allow the user to select the piece to promote to.
--   Add authentication through Firebase for the game and the database.
--   Restrict access to the database to only allow authenticated users to make changes.
--   Restrict access to the database to only allow the two players to make changes to a given game.
--   Better styling for potential moves.
-
-## Contributions
-
-Feel free to fork this project and make contributions. For any major changes, please open an issue first to discuss the proposed changes.
-
-## License
-
-MIT License
-
-## Author
-
-This project is authored by [Graphicnapkin](https://github.com/graphicnapkin). For any questions, feel free to open an issue on GitHub or contact the author.
-Yes, I did use chatGPT to write this Readme.md (and a good amount of the initial app code.
+The original README described the app as MIT while package.json declares ISC; the app license needs owner clarification before changing either declaration. Bundled Stockfish is GPLv3; its license and source are retained in `dist/stockfish/`, and `Copying.txt` is included with deployed engine assets.

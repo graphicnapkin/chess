@@ -1,54 +1,46 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Chess } from 'chess.js'
-import { type MakeMove } from './useChessGame'
-
-// Custom React hook to handle Stockfish AI integration.
-export const useStockfishWorker = (
-    game: Chess, // The current game state
-    difficulty: number, // The difficulty level of the AI between 1-20
-    playerColor: string,
-    makeMove: MakeMove,
-    gameType: React.MutableRefObject<'ai' | 'multiplayer'>
-) => {
-    const stockfish = useRef<Worker | null>(null)
-
+export function useStockfishWorker(fen: string, difficulty: number, playerColor: string, enabled: boolean, onMove: (move: { from: string; to: string; promotion?: string }) => void) {
+    const callback = useRef(onMove)
+    callback.current = onMove
+    const [error, setError] = useState('')
+    const [thinking, setThinking] = useState(false)
     useEffect(() => {
-        // Terminate the worker if it exists which prevents memory leaks
-        if (stockfish.current) {
-            stockfish.current.terminate()
+        setError(''); setThinking(false)
+        const position = new Chess(fen)
+        if (!enabled || position.turn() === playerColor || position.isGameOver()) return
+        if (!window.Worker || !window.crossOriginIsolated) {
+            setError('The chess engine could not start. Reload this page in a supported browser.')
+            return
         }
-
-        if (gameType.current == 'multiplayer') return
-
-        // Initialize the worker and set the skill level
-        if (window.Worker) {
-            stockfish.current = new Worker('/stockfish/stockfish.js')
-            stockfish.current.onmessage = stockfishMessage
-            stockfish.current?.postMessage(
-                'setoption name Skill Level value ' + difficulty
-            )
-        }
-
-        // If it is the AI's turn, make a move
-        if (game.turn() != playerColor) {
-            stockfish.current?.postMessage('position fen ' + game.fen())
-            stockfish.current?.postMessage('go depth 9')
-        }
-    }, [playerColor, difficulty, gameType.current])
-
-    const stockfishMessage = (event: MessageEvent<any>) => {
-        // If the AI is done calculating a move, make it
-        if (game.turn() != playerColor && event.data.includes('bestmove')) {
-            const bestMove = event.data.split(' ')[1]
-            const nextMove = {
-                from: bestMove.slice(0, 2),
-                to: bestMove.slice(2, 4),
-                promote: 'q',
+        // Each worker belongs to one position; reset/undo invalidate all its replies.
+        const worker = new Worker('/stockfish/stockfish.js')
+        let active = true
+        setThinking(true)
+        const timeout = window.setTimeout(() => {
+            active = false; worker.terminate(); setThinking(false)
+            setError('The engine took too long. Start a new game to try again.')
+        }, 30000)
+        worker.onerror = () => { if (active) { setError('The chess engine failed to load. Please reload.'); setThinking(false) } }
+        worker.onmessage = ({ data }) => {
+            if (!active || typeof data !== 'string') return
+            if (data.trim() === 'uciok') {
+                worker.postMessage(`setoption name Skill Level value ${difficulty}`)
+                worker.postMessage('isready')
+            } else if (data.trim() === 'readyok') {
+                worker.postMessage(`position fen ${fen}`)
+                worker.postMessage('go depth 8')
+            } else {
+                const best = /^bestmove ([a-h][1-8])([a-h][1-8])([qrbn])?/.exec(data)
+                if (best) {
+                    active = false; window.clearTimeout(timeout); setThinking(false)
+                    callback.current({ from: best[1], to: best[2], promotion: best[3] || 'q' })
+                    worker.terminate()
+                }
             }
-
-            makeMove(nextMove, game, 'ai', stockfish, '')
         }
-    }
-
-    return stockfish
+        worker.postMessage('uci')
+        return () => { active = false; window.clearTimeout(timeout); worker.terminate() }
+    }, [fen, difficulty, playerColor, enabled])
+    return { error, thinking }
 }
