@@ -1,48 +1,25 @@
 import React from 'react'
-import Pieces, { pieceValues } from '../assets/chesspieces'
+import { pieceValues } from '../assets/chesspieces'
+import { PieceCode, PieceGraphic, PieceStyle } from './PieceStylePicker'
 
-const CapturedPieces = ({
-    pieces,
-    color,
-}: {
-    pieces: string[]
-    color: 'w' | 'b'
-}) => {
-    let playerScore =
-        pieces
-            .filter((piece) => piece[0] == color)
-            .reduce(
-                (a, b) =>
-                    a +
-                    Math.abs(pieceValues[(b[0] + b[1].toUpperCase()) as 'wP']),
-                0
-            ) -
-        pieces
-            .filter((piece) => piece[0] != color)
-            .reduce(
-                (a, b) =>
-                    a +
-                    Math.abs(pieceValues[(b[0] + b[1].toUpperCase()) as 'wP']),
-                0
-            )
+const pieceNames = { P: 'pawn', N: 'knight', B: 'bishop', R: 'rook', Q: 'queen', K: 'king' }
 
-    return (
-        <div className="flex flex-row" style={{ minHeight: '45px' }}>
-            {pieces
-                .filter((piece) => piece[0] == color)
-                .map((piece, index) => (
-                    <div key={index}>
-                        {Pieces[(piece[0] + piece[1].toUpperCase()) as 'wP']}
-                    </div>
-                ))}
-            {playerScore > 0 && (
-                <div className="text-green-500">+{playerScore}</div>
-            )}
-            {playerScore < 0 && (
-                <div className="text-red-500">{playerScore}</div>
-            )}
-        </div>
-    )
+export default function CapturedPieces({ pieces, color, pieceStyle }: {
+    pieces: string[]; color: 'w' | 'b'; pieceStyle: PieceStyle;
+}) {
+    const captured = pieces.filter(piece => piece[0] === color)
+    const playerScore = pieces.reduce((score, piece) => {
+        const value = Math.abs(pieceValues[(piece[0] + piece[1].toUpperCase()) as PieceCode])
+        return score + (piece[0] === color ? value : -value)
+    }, 0)
+    return <div className="captured-pieces" aria-label={`${color === 'w' ? 'White' : 'Black'} pieces captured`}>
+        {captured.map((piece, index) => {
+            const code = (piece[0] + piece[1].toUpperCase()) as PieceCode
+            const name = `${color === 'w' ? 'White' : 'Black'} ${pieceNames[code[1] as keyof typeof pieceNames]}`
+            return <span className="captured-piece" key={index} role="img" aria-label={name} title={name}>
+                <PieceGraphic piece={code} style={pieceStyle} size={28} />
+            </span>
+        })}
+        {playerScore !== 0 && <span className="material-score">{playerScore > 0 ? '+' : ''}{playerScore}</span>}
+    </div>
 }
-
-export default CapturedPieces

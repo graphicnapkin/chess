@@ -37,7 +37,9 @@ See [Supabase and OAuth setup](docs/SETUP.md), [architecture](docs/ARCHITECTURE.
 
 - Real Stockfish AI, color/difficulty selection, undo, reset, and session recovery.
 - Drag, click, or keyboard move entry; selectable pawn promotion.
-- Captured pieces, move history, and PGN download.
+- Saved board themes and Classic, Chessnut, and Spatial piece styles.
+- Captured pieces with scalable artwork, move history, and PGN download.
+- Game-over dialogs with player-relative results, draw reasons, and board review.
 - Supabase-backed invitations, assigned player seats, validated moves, and reconnect snapshots (requires hosted setup).
 - Full-page Google/GitHub OAuth redirects with PKCE (requires provider setup).
 

@@ -6,3 +6,5 @@ for (const file of ['stockfish.js','stockfish.wasm','Copying.txt']) {
   fs.copyFileSync(path.join(root,'dist/stockfish',file),path.join(root,'build/stockfish',file))
 }
 fs.copyFileSync(path.join(root,'public/index.html'),path.join(root,'build/index.html'))
+
+fs.cpSync(path.join(root,'public/ui'),path.join(root,'build/ui'),{recursive:true})

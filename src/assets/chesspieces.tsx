@@ -6,6 +6,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -31,6 +32,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -91,6 +93,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -145,6 +148,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -189,6 +193,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -254,6 +259,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -331,6 +337,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -356,6 +363,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -463,6 +471,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -524,6 +533,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -568,6 +578,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >
@@ -654,6 +665,7 @@ export default {
         <svg
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"
+            viewBox="0 0 45 45"
             width="45"
             height="45"
         >

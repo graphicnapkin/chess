@@ -9,6 +9,6 @@ http.createServer((req,res) => {
   res.setHeader('Cross-Origin-Opener-Policy','same-origin')
   res.setHeader('Cross-Origin-Embedder-Policy','require-corp')
   res.setHeader('Cache-Control','no-store')
-  res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.wasm':'application/wasm','.txt':'text/plain'})[path.extname(target)] || 'application/octet-stream')
+  res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.wasm':'application/wasm','.txt':'text/plain','.css':'text/css','.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf'})[path.extname(target)] || 'application/octet-stream')
   fs.readFile(target,(error,data) => { res.writeHead(error ? 404 : 200);res.end(error ? 'Not found' : data) })
 }).listen(9001,'127.0.0.1',()=>console.log('Production preview: http://127.0.0.1:9001'))

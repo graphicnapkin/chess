@@ -36,3 +36,11 @@ Verified on the custom domain: three real-Stockfish browser tests; two-user host
 Google and GitHub authorization endpoints accepted the production return URL and used the expected Supabase callback. The owner reported complete social login working on the preview; a complete social login on the custom domain was left for the owner to confirm. Google IAM/billing was not independently audited. Vercel's error-log query returned no logs, which is not proof of comprehensive monitoring.
 
 This is historical evidence. Recheck live deployment and repository state before future releases.
+
+## UI revision — 2026-09-14
+
+Modernized the portfolio-aligned interface and provider buttons, removed promotional copy, and added links back to graphicnapkin.com. Board themes and piece styles persist locally. Captured pieces use complete, correctly scaled artwork. Piece and font assets are served locally with their license/attribution files.
+
+Game-over dialogs use chess.js history and the player's assigned color to distinguish wins, losses, and draw reasons. Native modal behavior, explicit keyboard focus, board review, result reopening, and local restart are supported. Online games offer board review or a computer game; no online rematch protocol was added.
+
+Verification: production build, seven rule/database/result tests, and eight browser tests passed locally. Browser coverage includes real Stockfish, mobile layouts, preferences, captured artwork, modal keyboard behavior, and simulated signed-in winner/loser seat handling. The simulated online result test intercepts backend requests; it does not claim fresh live multiplayer or social-login verification.
