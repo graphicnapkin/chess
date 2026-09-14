@@ -2,6 +2,10 @@
 
 React/TypeScript chess with Stockfish running in a browser Web Worker. Node 24 is used to build the frontend. Supabase provides optional multiplayer and Google/GitHub login; computer games work without backend configuration.
 
+## Agent handoff
+
+Future coding agents should start with [AGENTS.md](AGENTS.md) for project boundaries, constraints, tests, and release guidance.
+
 ## Develop
 
 Use Node 24 (`.nvmrc` / `.node-version`).
