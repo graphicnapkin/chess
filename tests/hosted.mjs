@@ -33,7 +33,7 @@ try {
   contexts.push(context)
  }
  const first=await contexts[0].newPage(), second=await contexts[1].newPage(), third=await contexts[2].newPage()
-  await first.goto('http://127.0.0.1:9001')
+  await first.goto(process.env.TEST_URL || 'http://127.0.0.1:9001')
  await first.getByRole('button',{name:'Invite a friend',exact:true}).click()
  await first.waitForURL('**/?game=*',{timeout:15000})
  const invite=first.url(),id=new URL(invite).searchParams.get('game')

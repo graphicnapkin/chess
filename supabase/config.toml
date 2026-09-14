@@ -3,5 +3,5 @@ project_id = "chess"
 # The handler verifies every user token with auth.getUser before database access.
 verify_jwt = false
 [auth]
-site_url = "https://chess-iu8v.vercel.app"
-additional_redirect_urls = ["http://localhost:9000/**", "http://127.0.0.1:9001/**", "https://chess-iu8v.vercel.app/**", "https://chess-md1bcbauv-graphicnapkins-projects.vercel.app/**"]
+site_url = "https://chess.graphicnapkin.com"
+additional_redirect_urls = ["https://chess.graphicnapkin.com/**", "http://localhost:9000/**", "http://127.0.0.1:9001/**", "https://chess-iu8v.vercel.app/**", "https://chess-md1bcbauv-graphicnapkins-projects.vercel.app/**"]

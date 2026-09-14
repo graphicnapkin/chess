@@ -1,21 +1,21 @@
 # Roadmap and handoff
 
-## Implemented locally
+## Implemented
 - Node 24 runtime pins, CI build/test workflow template, Vercel configuration.
 - Remove Firebase; local AI works without configuration.
 - Preserve Stockfish and cross-origin isolation; retire old isolation service worker.
 - Supabase schema, restricted RPCs, Edge Function and frontend adapter.
-- PKCE login integration; actual provider configuration is still needed.
+- PKCE login integration; Google and GitHub providers configured and reported working by the owner.
 - Responsive UI, promotion picker, keyboard entry, history and PGN export.
 - Local PostgreSQL and actual browser-engine regression coverage.
 
 ## Pending external access and verification
 - DONE: Supabase CLI authenticated.
 - DONE: migration and function deployed to mtcibrvwekegkvcjqlwf.
-- DONE: local and Vercel Preview public variables configured; production variables pending release.
-- Create/configure Google and GitHub OAuth clients; inspect Google IAM/billing.
-- DONE: two-user hosted gameplay, refresh, Realtime, outsider RLS, direct write/RPC denial, illegal moves, concurrent duplicate rejection and offline reconnect verified. OAuth provider flow still pending.
-- Review preview and release to production.
+- DONE: local, Vercel Preview, and Production public variables configured.
+- DONE: Google and GitHub OAuth clients configured. Google IAM/billing still requires owner verification.
+- DONE: two-user hosted gameplay, refresh, Realtime, outsider RLS, direct write/RPC denial, illegal moves, concurrent duplicate rejection and offline reconnect verified. Owner reports social login working on the preview.
+- DONE: preview accepted by owner. Production domain configured as https://chess.graphicnapkin.com.
 
 ## Later polish
 - Worker reuse with explicit cancellation/search IDs if profiling shows startup overhead.

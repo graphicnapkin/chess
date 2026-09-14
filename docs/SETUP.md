@@ -53,3 +53,11 @@ For Google: use a dedicated OAuth-only Cloud project. Verify that it has no link
 ## Local evidence and limitations
 
 `npm test` executes real PostgreSQL (PGlite) permission/transaction tests and chess-rule tests. It does not test hosted Supabase Auth, Realtime delivery, or the deployed Edge Function. Playwright exercises local real Stockfish gameplay and layout. Hosted acceptance remains necessary.
+
+## Production domain
+
+Production frontend: https://chess.graphicnapkin.com
+
+This exact origin is allowed in Supabase Auth redirects and the game function's ALLOWED_ORIGINS. Vercel Production must contain SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY before building. The Google and GitHub provider callback remains the Supabase callback above. Keep the Google OAuth client's authorized JavaScript origins and GitHub OAuth app homepage aligned with this production URL.
+
+Run browser and hosted acceptance tests against production by setting TEST_URL=https://chess.graphicnapkin.com. The hosted test creates temporary users and games and cleans them up afterward; it does not complete social-provider login.
