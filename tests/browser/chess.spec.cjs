@@ -83,7 +83,7 @@ test('board themes update squares, survive reload, and support keyboard selectio
 test('provider buttons render local logos and the interface font loads',async({page})=>{
  await page.goto('/')
  await page.evaluate(()=>document.fonts.ready)
- expect(await page.evaluate(()=>Array.from(document.fonts).some(font=>font.family.includes('DM Sans') && font.status==='loaded'))).toBe(true)
+ expect(await page.evaluate(()=>Array.from(document.fonts).some(font=>font.family.includes('Inter') && font.status==='loaded'))).toBe(true)
  for(const name of ['Continue with Google','Continue with GitHub']) {
   const button=page.getByRole('button',{name,exact:true})
   await expect(button).toBeVisible()
@@ -192,4 +192,42 @@ test('signed-in online players see results from their assigned seat',async({brow
   await expect(dialog).toContainText('Black wins by checkmate.')
   await context.close()
  }
+})
+
+test('promotion supports cancel, Escape, keyboard containment and retry',async({page})=>{
+ await page.goto('/')
+ await page.evaluate(()=>sessionStorage.setItem('gnap-chess-local-v1','[SetUp "1"]\n[FEN "7k/P7/8/8/8/8/8/7K w - - 0 1"]\n\n*'))
+ await page.reload()
+ const promote=async()=>{await page.locator('[data-squareid="a7"]').click();await page.locator('[data-squareid="a8"]').click()}
+ await promote()
+ const dialog=page.getByRole('dialog',{name:'Promote your pawn'})
+ await expect(dialog).toBeVisible()
+ await expect(dialog.getByRole('button',{name:'Queen',exact:true})).toBeFocused()
+ for(let i=0;i<7;i++) {await page.keyboard.press('Tab');expect(await dialog.evaluate(el=>el.contains(document.activeElement))).toBe(true)}
+ await page.keyboard.press('Escape')
+ await expect(dialog).not.toBeVisible()
+ await expect(page.locator('.move-list')).toHaveText('No moves yet.')
+ await expect.poll(()=>page.evaluate(()=>sessionStorage.getItem('gnap-chess-local-v1'))).toContain('7k/P7')
+ await promote()
+ await dialog.getByRole('button',{name:'Cancel',exact:true}).click()
+ await expect(dialog).not.toBeVisible()
+ await promote()
+ await dialog.getByRole('button',{name:'Rook',exact:true}).click()
+ await expect(page.locator('.move-list')).toContainText('a8=R')
+})
+
+test('skip link reaches keyboard input and illegal moves report a readable error',async({page})=>{
+ await page.goto('/')
+ await page.keyboard.press('Tab')
+ await expect(page.getByRole('link',{name:'Skip to move entry'})).toBeFocused()
+ await page.keyboard.press('Enter')
+ await expect(page.getByLabel('Enter a move')).toBeFocused()
+ await page.getByLabel('Enter a move').fill('e5')
+ await page.keyboard.press('Enter')
+ await expect(page.getByRole('alert')).toHaveText('Enter a legal move, such as e4 or Nf3.')
+ await expect(page.getByLabel('Enter a move')).toHaveAttribute('aria-describedby','game-error')
+ await expect(page.locator('.move-list')).toHaveText('No moves yet.')
+ await page.getByRole('button',{name:'New game',exact:true}).click()
+ await expect(page.getByRole('alert')).toHaveCount(0)
+ await expect(page.getByLabel('Enter a move')).toHaveValue('')
 })

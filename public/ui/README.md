@@ -1,7 +1,7 @@
 # UI assets
 
-- `dm-sans.ttf`: DM Sans variable font from Google Fonts, used by the portfolio and hosted locally here. License: `OFL-DM-Sans.txt`.
-  Source: https://github.com/google/fonts/tree/main/ofl/dmsans
+- `inter.ttf`: Inter variable font from Google Fonts, hosted locally to match the portfolio. License: `OFL-Inter.txt`.
+  Source: https://github.com/google/fonts/tree/main/ofl/inter
 - `google-g.png`: unmodified Google sign-in logo from https://developers.google.com/static/identity/images/g-logo.png
   Branding reference: https://developers.google.com/identity/branding-guidelines
 - `github.svg`: unmodified GitHub Invertocat from the official https://brand.github.com/GitHub_Logos.zip package.
