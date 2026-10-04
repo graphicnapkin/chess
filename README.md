@@ -46,3 +46,7 @@ See [Supabase and OAuth setup](docs/SETUP.md), [architecture](docs/ARCHITECTURE.
 ## Licensing
 
 The original README described the app as MIT while package.json declares ISC; the app license needs owner clarification before changing either declaration. Bundled Stockfish is GPLv3; its license and source are retained in `dist/stockfish/`, and `Copying.txt` is included with deployed engine assets.
+
+## Architecture overview
+
+[Component diagram and plain-language service roles](docs/architecture/README.md), with editable Mermaid source and rendered SVG/PNG images.
