@@ -1,0 +1,21 @@
+flowchart TB
+ subgraph B["Player's browser"]
+ U["React chessboard<br/>Controls and game history"]
+ R["chess.js<br/>Local rules"]
+ W["Stockfish WebAssembly worker<br/>Computer opponent"]
+ end
+ subgraph H["Hosted services"]
+ V["Vercel<br/>Static frontend assets"]
+ A["Supabase Auth<br/>Google or GitHub sign-in"]
+ F["Supabase Edge Function<br/>Verify user and replay moves"]
+ D[("Postgres<br/>Transactional game state")]
+ T["Supabase Realtime<br/>Participant updates"]
+ end
+ V -->|Load app| U
+ U <--> R
+ U <-->|Local analysis| W
+ U <-->|Sign-in| A
+ U -->|Authenticated game request| F
+ F -->|Validated, versioned write| D
+ D --> T -->|Authorized game changes| U
+ U <-->|Participant-only reads| D
