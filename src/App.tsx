@@ -7,6 +7,7 @@ import { useAuth } from './hooks/useAuth'
 import { useOnlineGame } from './hooks/useOnlineGame'
 import { getGameOutcome } from './gameOutcome'
 import GameResultDialog from './components/GameResultDialog'
+import PromotionDialog from './components/PromotionDialog'
 import CapturedPieces from './components/CapturedPieces'
 import PieceStylePicker, { createBoardPieces, readPieceStyle } from './components/PieceStylePicker'
 import BoardThemePicker, { boardThemes, readBoardTheme } from './components/BoardThemePicker'
@@ -73,7 +74,7 @@ export default function App() {
         finally { setBusy(false) }
     }
     const startLocal = () => {
-        local.reset(); setMode('ai'); setGameId(null); setSelected(null); setPromotion(null); setError('')
+        local.reset(); setMode('ai'); setGameId(null); setSelected(null); setPromotion(null); setError(''); setMoveText(''); setCopied(false)
         window.history.replaceState(null, '', '/')
     }
     const share = async () => {
@@ -81,7 +82,18 @@ export default function App() {
         catch { setError('Copy the invitation from your address bar.') }
     }
     return <main className="app-shell">
+        <a className="skip-link" href="#move-entry">Skip to move entry</a>
         <header className="site-header"><h1 className="brand"><span className="brand-mark" aria-hidden="true"><i /><i /><i /><i /></span>GN<span> / </span>CHESS</h1><a href="https://graphicnapkin.com">Graphicnapkin <span aria-hidden="true">↗</span></a></header>
+        <section className="game-intro" aria-label="About this game">
+            <div><h2>Chess, at your pace.</h2><p>Play Stockfish or invite a friend.</p></div>
+            <svg className="chess-doodle" viewBox="0 0 144 96" fill="none" aria-hidden="true">
+                <g stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M13 80c34-3 80 3 118-1M24 73h45l-4-8H29l-5 8ZM32 64c4-10 4-21 1-31l-5-12 10 5 9-13 9 14 11-5-6 12c-4 11-5 21-2 29M33 34l27 1M37 43l18 1"/>
+                    <path d="M85 73h37l-3-7H88l-3 7ZM93 64l4-17c-8-3-10-10-5-16 4-5 11-6 16-2 9 6 6 14-2 18l5 17M97 48h9"/>
+                </g>
+                <path d="m74 14 3 6m6-9-1 7m10 1-6 4" stroke="#AC3225" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+        </section>
         <section className="game-layout">
             <div className="board-panel">
                 <div className="board-toolbar"><p role="status" className="game-status">{expired ? 'This game has expired' : status}</p><span className="mode-label">{mode === 'ai' ? 'Computer' : 'Online'}</span></div>
@@ -111,7 +123,7 @@ export default function App() {
                     setPieceStyle(value)
                     try { localStorage.setItem('gnap-piece-style', value) } catch {}
                 }} />
-                {promotion && <div role="dialog" aria-modal="true" aria-label="Promote pawn" className="promotion"><p>Promote your pawn</p>{[['q','Queen'],['r','Rook'],['b','Bishop'],['n','Knight']].map(([piece,label]) => <button autoFocus={piece === 'q'} key={piece} onClick={() => submit(promotion.from, promotion.to, piece)}>{label}</button>)}</div>}
+                {promotion && <PromotionDialog onChoose={piece => submit(promotion.from, promotion.to, piece)} onCancel={() => setPromotion(null)} />}
             </div>
             <aside className="sidebar">
                 <section className="card" aria-label="Game controls">
@@ -121,13 +133,13 @@ export default function App() {
                     <div className="button-row"><button onClick={() => { local.undo(color); setSelected(null); setPromotion(null) }} disabled={!history.length}>Undo</button><button className="primary" onClick={startLocal}>New game</button></div></>}
                     {mode === 'multiplayer' && <><button onClick={share}>{copied ? 'Invitation copied' : 'Copy invitation'}</button><button onClick={startLocal}>Play the computer</button></>}
                 </section>
-                {(error || auth.error || online.error || engine.error) && <p role="alert" className="error">{error || auth.error || online.error || engine.error}</p>}
+                {(error || auth.error || online.error || engine.error) && <p id="game-error" role="alert" className="error">{error || auth.error || online.error || engine.error}</p>}
                 <section className="card moves-card"><h2>Moves</h2><form onSubmit={e => {
                     e.preventDefault()
                     if (!canMove) return
                     try { const parsed = new Chess(game.fen()).move(moveText); submit(parsed.from, parsed.to, parsed.promotion); setMoveText(''); setError('') }
                     catch { setError('Enter a legal move, such as e4 or Nf3.') }
-                }}><label htmlFor="move-entry">Enter a move (for example, e4)</label><div className="button-row"><input id="move-entry" value={moveText} onChange={e => setMoveText(e.target.value)} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="e4, Nf3…" /><button type="submit" disabled={!canMove || !moveText}>Move</button></div></form><p className="move-list" aria-label="Move history">{history.length ? history.map((move, i) => `${i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ''}${move.san}`).join(' ') : 'No moves yet.'}</p>
+                }}><label htmlFor="move-entry">Enter a move (for example, e4)</label><div className="button-row"><input id="move-entry" value={moveText} onChange={e => setMoveText(e.target.value)} aria-describedby={(error || auth.error || online.error || engine.error) ? "game-error" : undefined} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="e4, Nf3…" /><button type="submit" disabled={!canMove || !moveText}>Move</button></div></form><p className="move-list" aria-label="Move history">{history.length ? history.map((move, i) => `${i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ''}${move.san}`).join(' ') : 'No moves yet.'}</p>
                     <button disabled={!history.length} onClick={() => { const url = URL.createObjectURL(new Blob([game.pgn()], { type: 'application/x-chess-pgn' })); const a = document.createElement('a'); a.href = url; a.download = 'game.pgn'; a.click(); URL.revokeObjectURL(url) }}>Download PGN</button>
                 </section>
                 <section className="card online-card" aria-label="Online play"><h2>Play a friend</h2>

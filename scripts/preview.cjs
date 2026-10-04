@@ -11,4 +11,4 @@ http.createServer((req,res) => {
   res.setHeader('Cache-Control','no-store')
   res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.wasm':'application/wasm','.txt':'text/plain','.css':'text/css','.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf'})[path.extname(target)] || 'application/octet-stream')
   fs.readFile(target,(error,data) => { res.writeHead(error ? 404 : 200);res.end(error ? 'Not found' : data) })
-}).listen(9001,'127.0.0.1',()=>console.log('Production preview: http://127.0.0.1:9001'))
+}).listen(Number(process.env.PORT || 9001),'127.0.0.1',()=>console.log(`Production preview: http://127.0.0.1:${process.env.PORT || 9001}`))
